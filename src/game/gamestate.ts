@@ -16,7 +16,7 @@ function copyConfig(config: GameConfig): GameConfig {
 }
 
 export type state = (
-    'game_initialise' |
+    'new_round' |
     'play_card' |
     'trick_complete' |
     'hand_complete' |
@@ -29,6 +29,7 @@ export class GameState {
     public currentPlayerIndex: number;
     public leaderIndex: number | null = null;
     public pack: Card[];
+    public fullPack: Card[];
 
     public players: Player[] = [];
     public trickIndex: number;
@@ -36,7 +37,7 @@ export class GameState {
     public playedCards: Card[] = [];
 
     public handNumber: number = 0;
-    public currentState: state = 'game_initialise';
+    public currentState: state = 'new_round';
 
     public previousTrick: [Card, Player][] = [];
 
@@ -56,6 +57,7 @@ export class GameState {
         this.currentPlayerIndex = 0;
         this.trickIndex = 0;
         this.pack = getFullPack();
+        this.fullPack = getFullPack();  // only need if we have variable sizes
     }
 
     public clone(): GameState {
@@ -69,6 +71,7 @@ export class GameState {
         newState.currentPlayerIndex = this.currentPlayerIndex;
         newState.leaderIndex = this.leaderIndex;
         newState.pack = [...this.pack];
+        newState.fullPack = [...this.fullPack];
 
         newState.players = this.players.map(player => player.clone());
         newState.trickIndex = this.trickIndex;
@@ -92,7 +95,10 @@ export class GameState {
         const state = this.currentState;
         // console.log(`Incrementing state - currently: ${state}`);
         switch (state) {
-            case 'game_initialise':
+            case 'new_round':
+                this.shuffle();
+                break;
+            case 'new_hand':
                 this.dealCards(log);
                 break;
             case 'play_card':
@@ -108,7 +114,7 @@ export class GameState {
                     this.completeLog(log);
                 }
                 // initialise as separate state - keeps from doing too much at once
-                this.currentState = 'game_initialise';
+                this.currentState = 'new_hand';
                 break;
             case 'game_complete':
                 if (log !== null) {
@@ -264,7 +270,7 @@ export class GameState {
     }
 
     public moveFromIndex(cardToPlayIndex: number): number {
-        const cardToPlay = Card.cardFromIndex(cardToPlayIndex, this.pack)
+        const cardToPlay = Card.cardFromIndex(cardToPlayIndex, this.fullPack)
 
         if (!this.playCard(cardToPlay)) {
             console.log("Error playing card");
@@ -331,11 +337,17 @@ export class GameState {
         return true;
     }
 
-    // TODO: seed?
-    dealCards(log: GameLog | null): void {
-        // TODO: remainder of pack - shuffle once each game then leave
+    shuffle(): void {
         const pack = getFullPack();
         shuffle(pack);
+        this.pack = pack;
+        this.playedCards = [];
+        this.currentState = 'new_hand';
+    }
+
+    // TODO: seed?
+    dealCards(log: GameLog | null): void {
+        const pack = this.pack;
         for (let i = 0; i < this.cardsPerHand; i++) {
             for (let playerIndex = 0; playerIndex < this.numPlayers; playerIndex++) {
                 const card = pack.pop();
@@ -348,7 +360,6 @@ export class GameState {
         this.currentPlayerIndex = this.getNextPlayerIndex(this.dealerIndex);
         this.handNumber++;
         this.trickIndex = 0;
-        this.playedCards = [];
 
         if (log !== null) {
             // and update the current log

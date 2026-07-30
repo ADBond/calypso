@@ -64,7 +64,7 @@ export async function renderState(state: GameStateForUI) {
 }
 
 const delayMap: Record<state, number> = {
-  game_initialise: 10,
+  new_round: 10,
   play_card: 700,
   trick_complete: 1700,
   hand_complete: 3000,
