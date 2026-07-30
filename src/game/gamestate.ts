@@ -333,25 +333,17 @@ export class GameState {
 
     // TODO: seed?
     dealCards(log: GameLog | null): void {
-        // TODO: multipack
+        // TODO: remainder of pack - shuffle once each game then leave
         const pack = getFullPack();
         shuffle(pack);
         for (let i = 0; i < this.cardsPerHand; i++) {
-            // for (const player of this.state.players) {
-            // TODO: loop this properly!
             for (let playerIndex = 0; playerIndex < this.numPlayers; playerIndex++) {
                 const card = pack.pop();
                 if (card) this.giveCardToPlayer(playerIndex, card);
             }
         }
 
-        // TODO now pack should be empty at 4p
-        // console.log("Empty pack:");
-        // console.log([...pack]);
-        // console.log([...this.getPlayerHand(0)]);
-        // console.log([...this.getPlayerHand(1)]);
-        // console.log([...this.getPlayerHand(2)]);
-        // console.log([...this.getPlayerHand(3)]);
+        // TODO: check expected remainder size?
         this.currentState = 'play_card';
         this.currentPlayerIndex = this.getNextPlayerIndex(this.dealerIndex);
         this.handNumber++;

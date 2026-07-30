@@ -175,7 +175,7 @@ export function makeRanks(shortNames: string[]): Rank[] {
     return shortNames.map(getRank);
 }
 
-export function getFullPack(): Card[] {
+export function getFullPack(copies: number = 4): Card[] {
     const cards = [];
     const SUITS = getSuits();
     let index = 0;
@@ -184,24 +184,14 @@ export function getFullPack(): Card[] {
             rank.ttRankAbove = 2;
         }
         for (const suit of SUITS) {
-            let card = new Card(suit, rank, index)
-            cards.push(card);
-            index++;
+            for (let i = 0; i < copies; i++) {
+                let card = new Card(suit, rank, index)
+                cards.push(card);
+                index++;
+            }
         }
     }
     return cards;
-}
-
-export function makeCard(cardStringShort: string): Card {
-    const rank = getRank(cardStringShort[0]);
-    const suit = getSuit(cardStringShort[1]);
-    return getFullPack().filter(
-        (packCard) => Suit.suitEquals(packCard.suit, suit) && Rank.rankEquals(packCard.rank, rank)
-    )[0]
-}
-
-export function makeCards(cardStringsShort: string[]): Card[] {
-    return cardStringsShort.map(str => makeCard(str,));
 }
 
 // suit doesn't matter here
