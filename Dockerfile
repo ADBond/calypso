@@ -7,9 +7,9 @@ COPY package.json package-lock.json ./
 
 RUN npm ci --ignore-scripts
 
-# COPY index.html ./index.html
-# COPY public/ ./public/
-# COPY tests/ ./tests/
+COPY index.html ./index.html
+COPY public/ ./public/
+COPY tests/ ./tests/
 # COPY src/ ./src/
 
 EXPOSE 5173
