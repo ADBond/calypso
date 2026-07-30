@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calypso</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="/src/main.ts" defer></script>
+    <meta name="description" content="Play Calypso Online is a place to play
+        the trick-taking card game Calypso against bot players
+        in-browser.">
+</head>
+
+<body>
+    <div id="new-game-button">New game</div>
+    <div id="new-game-menu" hidden>
+        <form id="new-game-form">
+            <fieldset>
+                <legend>Trickplay</legend>
+                <input type="radio" name="trickplay" value="standard" id="trickplay-standard">
+                <label for="trickplay-standard">Standard</label>
+                <input type="radio" name="trickplay" value="allfours" id="trickplay-allfours">
+                <label for="trickplay-allfours">All Fours</label>
+
+            </fieldset>
+
+            <button type="submit" id="play-now">Play Now</button>
+        </form>
+    </div>
+
+    <div class="config" id="config"></div>
+    <div class="hand-number" id="hand-number"></div>
+
+    <div id="game-board" class="game-board">
+    </div>
+
+    <div class="hand">
+        <div id="player-hand"></div>
+    </div>
+
+</body>
+
+</html>
