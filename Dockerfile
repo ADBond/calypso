@@ -10,7 +10,7 @@ RUN npm ci --ignore-scripts
 COPY index.html ./index.html
 COPY public/ ./public/
 COPY tests/ ./tests/
-# COPY src/ ./src/
+COPY src/ ./src/
 
 EXPOSE 5173
 

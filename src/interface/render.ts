@@ -1,0 +1,88 @@
+import { createCardElement } from './ui';
+import { GameStateForUI, state } from '../game/gamestate';
+import { PlayerName } from '../game/player';
+import { onHumanPlay } from './api';
+
+
+export async function renderState(state: GameStateForUI) {
+  console.log(state);
+  const n_players = state.playerNameArr.length;
+  const handEl = document.getElementById('player-hand')!;
+  const playerHand = state.hands.player;
+  playerHand.sort(
+    (c1, c2) => (
+      // 100 big enough to ensure we always sort by suit first
+      // TODO: align order with personal suit
+      100 * (c1.suit.rankForSorting - c2.suit.rankForSorting) +
+      (c1.rank.trickTakingRank - c2.rank.trickTakingRank)
+    )
+  );
+  handEl.innerHTML = '';
+  playerHand.forEach(card => {
+    handEl.appendChild(
+      createCardElement(card.toStringShort(), state.whoseTurn === "player" ? (() => onHumanPlay(card)) : undefined)
+    )
+  });
+
+  const gameBoard = document.getElementById("game-board")!;
+  gameBoard.innerHTML = '';
+
+  state.playerNameArr.forEach(p => {
+    const areaEl = document.createElement("div");
+    const playedEl = document.createElement("div");
+    areaEl.classList.add("player-area");
+    areaEl.classList.add(`${p}-${n_players}`);
+    playedEl.id = `played-${p}-${n_players}`;
+    playedEl.classList.add("played");
+    areaEl.appendChild(playedEl);
+    gameBoard.appendChild(areaEl);
+    if (p === state.dealer) {
+      playedEl.classList.add('dealer');
+    } else {
+      playedEl.classList.remove('dealer');
+    }
+    const card = state.played[p as PlayerName];
+    let el: HTMLElement;
+    if (card === 'back') {
+      el = createCardElement('back');
+    } else {
+      el = createCardElement(
+        card !== null ? card.toStringShort() : ""
+      );
+      el.classList.add('played-card');
+    }
+    playedEl.appendChild(el);
+  });
+
+
+  // game status - config
+  document.getElementById('config')!.innerText = `calypso ruleset: ${state.trickplay}`;
+  // and current status
+  document.getElementById('hand-number')!.innerText = `(hand #${state.handNumber}, trick #${state.trickNumber})`;
+
+
+}
+
+const delayMap: Record<state, number> = {
+  game_initialise: 10,
+  play_card: 700,
+  trick_complete: 1700,
+  hand_complete: 3000,
+  new_hand: 10,
+  game_complete: 10,
+}
+
+export async function renderWithDelays(states: GameStateForUI[]) {
+  // console.log('rendering');
+  for (const state of states) {
+    // console.log('render')
+    // console.log(state);
+    await renderState(state);
+    await wait(delayMap[state.gameState]);
+  }
+}
+
+
+function wait(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
