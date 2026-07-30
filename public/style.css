@@ -106,6 +106,42 @@ body {
     background: #333;
 }
 
+.player-area {
+    position: absolute;
+    text-align: center;
+    border: black 1px;
+}
+
+.player-area.player-4 {
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.player-area.comp1-4 {
+    top: 160px;
+    left: 30px;
+}
+
+.player-area.comp2-4 {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.player-area.comp3-4 {
+    top: 160px;
+    right: 30px;
+}
+
+.played,
+.previous {
+    margin: 5px 0;
+}
+
+.played {
+    height: 110px;
+}
 
 .card {
     display: inline-block;
