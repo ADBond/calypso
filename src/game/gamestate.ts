@@ -1,4 +1,4 @@
-import { Card, Suit, getFullPack, shuffle } from "./card";
+import { Card, Suit, getFullPack, getSuits, rotArr, shuffle } from "./card";
 import { Player, PlayerName, playerNameArr } from "./player";
 import { Agent, AgentName, agentLookup } from "./agent/agent";
 import { GameLog } from "./log";
@@ -43,12 +43,19 @@ export class GameState {
 
     constructor(public playerNames: AgentName[], public config: GameConfig) {
         const agents: Agent[] = playerNames.map((name) => agentLookup(name));
+        // randomly rotate suit array for personal trump suits
+        const toRotate = Math.floor(Math.random() * playerNames.length);
+        let suits = getSuits();
+        for (let i = 0; i < toRotate; i++) {
+            suits = rotArr(suits);
+        }
         this.players = playerNames.map(
             (name, i) => new Player(
                 name,
                 playerNameArr[i],
                 agents[i],
                 i,
+                suits[i],
             )
         )
         // choose a random initial dealer
@@ -221,6 +228,10 @@ export class GameState {
         )
         ) as Record<PlayerName, Card | null>;
 
+    }
+
+    get trumpSuits(): Suit[] {
+        return this.players.map(player => player.trumpSuit);
     }
 
     get currentPlayer(): Player {

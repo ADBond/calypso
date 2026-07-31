@@ -1,4 +1,4 @@
-import { Card } from "./card";
+import { Card, Suit } from "./card";
 import { Agent } from "./agent/agent";
 
 export const playerNameArr = ['player', 'comp1', 'comp2', 'comp3'] as const;
@@ -11,6 +11,7 @@ export class Player {
         public name: PlayerName,
         public agent: Agent,
         public positionIndex: number,
+        public trumpSuit: Suit,
         public hand: Card[] = [],
         public scores: number[] = [],
         // public scores: ScoreBreakdown[] = [],
@@ -22,6 +23,7 @@ export class Player {
             this.name,
             this.agent,  // TODO: fine to share?
             this.positionIndex,
+            this.trumpSuit,
             [...this.hand],
             [...this.scores],
         );

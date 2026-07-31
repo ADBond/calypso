@@ -1,4 +1,4 @@
-import { Card } from "./card";
+import { Card, Suit } from "./card";
 import { Player } from "./player";
 import { GameConfig } from "./gamestate";
 import { AgentName } from "./agent/agent";
@@ -31,6 +31,7 @@ export class GameLog {
         private gameID: string,
         private config: GameConfig,
         private players: AgentName[],
+        private trumpSuits: Suit[],
     ) {
         this.playerCount = players.length;
     }

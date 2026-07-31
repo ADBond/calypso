@@ -1,6 +1,6 @@
 # TODOlist
 
-* assign personal suits
+* ~~assign personal suits~~
     * sort hand on this basis
 * trick winner
 * legal plays for allfours

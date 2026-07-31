@@ -32,7 +32,7 @@ export class Game {
     ) {
     this.gameID = randomID();
     this.state = new GameState(playerNames, config);
-    this.currentLog = new GameLog(this.gameID, config, playerNames);
+    this.currentLog = new GameLog(this.gameID, config, playerNames, this.state.trumpSuits);
     this.playerNames = playerNames;
   }
 
@@ -43,7 +43,7 @@ export class Game {
       if (!this.simulation) {
         sendGameLog(this.currentLog);
       }
-      this.currentLog = new GameLog(this.gameID, this.state.config, this.playerNames);
+      this.currentLog = new GameLog(this.gameID, this.state.config, this.playerNames, this.state.trumpSuits);
     }
   }
 
