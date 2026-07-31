@@ -265,21 +265,28 @@ export class GameState {
     }
 
     public trickWinnerPlayer(): Player {
-        const winningCardPlay = this.trickInProgress.filter(
-            ([card, player]) => Card.cardEquals(card, this.winningCard())
-        );
+        const winningCardPlay = this.winningCardPlay;
         // TODO: length check?
-        const trickWinner = winningCardPlay[0][1];
+        const trickWinner = winningCardPlay[1];
         return trickWinner;
     }
 
-
-    public winningCard(): Card {
-        // TODO: winning card logic, for each trickplay version
-        let winningCard: Card = this.trickInProgressCards[0];
-        return winningCard;
+    // logic separate so we can directly test
+    static trickWinnerIndex(trickCards: Card[], trumpSuits: Suit[]): number {
+        // return winner index
+        // makes it easy to extract data we need
+        return 0;
     }
 
+    public get winningCardPlay(): [Card, Player] {
+        // TODO: winning card logic, for each trickplay version
+        let winningCard: Card = this.trickInProgressCards[0];
+        // if non-trumps led, then highest trump wins (not counting followers as trumping)
+        // if no trumps then highest of led suit
+        // if trumps led, then highest trump wins (not counting leader if standard)
+        // if no trumps then leader
+        return [winningCard, this.currentPlayer];  // temp
+    }
 
     get handNotFinished(): boolean {
         return this.players.map(
@@ -394,6 +401,7 @@ export class GameState {
         const winnerPlayer = this.trickWinnerPlayer();
         const winnerPlayerIndex = winnerPlayer.positionIndex;
         this.currentPlayerIndex = winnerPlayerIndex;
+        // TODO: not how scoring works here
         const trickValue = this.updateScores(winnerPlayerIndex);
 
         if (log !== null) {
