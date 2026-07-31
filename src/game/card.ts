@@ -139,11 +139,12 @@ export const RANKS: Rank[] = [
 ];
 
 // TODO: named instead?
+// TODO: fix to 'canonical' form from square? need to check what that is
 const suitsData = [
     { name: "Diamonds", html: "&diams;"},
     { name: "Hearts", html: "&hearts;"},
-    { name: "Spades", html: "&spades;"},
     { name: "Clubs", html: "&clubs;"},
+    { name: "Spades", html: "&spades;"},
 ]
 
 export function rotArr(arr: any[]): any[] {
