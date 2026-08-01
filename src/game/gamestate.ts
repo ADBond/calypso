@@ -272,20 +272,75 @@ export class GameState {
     }
 
     // logic separate so we can directly test
-    static trickWinnerIndex(trickCards: Card[], trumpSuits: Suit[]): number {
+    static trickWinnerIndex(trickCards: Card[], trumpSuits: Suit[], trickplay: TrickPlayOption = 'standard'): number {
         // return winner index
         // makes it easy to extract data we need
-        return 0;
+        const ledSuit = trickCards[0].suit;
+        const trumpsLed = Suit.suitEquals(ledSuit, trumpSuits[0]);
+        // amount to shift ranks by depending on the suit status
+        const trumpBonus = 100;
+        const ledTrumpBonus = 50;
+        const discardBonus = -100;
+        let rankBonuses: number[];
+        if (trumpsLed) {
+            rankBonuses = trickCards.map(
+                (card, i) => {
+                    if (i === 0) {
+                        // special case the led card, as depends on trick play
+                        if (trickplay === 'standard') {
+                            // a led trump counts higher than any normal card, but not higher than a true trump
+                            return ledTrumpBonus;
+                        } else {
+                            // this counts as a true trump
+                            return trumpBonus;
+                        }
+                    }
+                    // played a trump - by necessity have not also followed
+                    if (Suit.suitEquals(card.suit, trumpSuits[i])) {
+                        return trumpBonus;
+                    }
+                    // if followed suit or not, effectively a discard, and cannot win trick
+                    return discardBonus;
+                }
+            )
+        } else {
+            // plainsuit lead
+            // works the same irrespective of trickplay rules
+            rankBonuses = trickCards.map(
+                (card, i) => {
+                    // follow suit, no bonus (always!)
+                    if (Suit.suitEquals(card.suit, ledSuit)) {
+                        return 0;
+                    }
+                    // played a trump - only if we haven't followed
+                    if (Suit.suitEquals(card.suit, trumpSuits[i])) {
+                        return trumpBonus;
+                    }
+                    // if neither, must've discarded, cannot win trick
+                    return discardBonus;
+                }
+            );
+        }
+        const cardValues = trickCards.map(
+            (card, i) => card.rank.trickTakingRank + rankBonuses[i]
+        );
+        // (first) max value is the winner!
+        return cardValues.reduce(
+            (maxIdx, currentVal, currentIdx) => currentVal > cardValues[maxIdx] ? currentIdx : maxIdx, 0
+        );
     }
 
     public get winningCardPlay(): [Card, Player] {
-        // TODO: winning card logic, for each trickplay version
-        let winningCard: Card = this.trickInProgressCards[0];
         // if non-trumps led, then highest trump wins (not counting followers as trumping)
         // if no trumps then highest of led suit
         // if trumps led, then highest trump wins (not counting leader if standard)
         // if no trumps then leader
-        return [winningCard, this.currentPlayer];  // temp
+        const winningIndex = GameState.trickWinnerIndex(
+            this.trickInProgressCards,
+            this.trumpSuits,
+            this.config.trickplay,
+        );
+        return this.trickInProgress[winningIndex];
     }
 
     get handNotFinished(): boolean {

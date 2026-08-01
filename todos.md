@@ -2,7 +2,7 @@
 
 * ~~assign personal suits~~
     * sort hand on this basis
-* trick winner
+* ~~trick winner~~
 * ~~legal plays for allfours~~
 * track calypso machinery
     * actual processing of them
