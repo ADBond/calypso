@@ -21,6 +21,7 @@ export type state = (
     'trick_complete' |
     'hand_complete' |
     'new_hand' |
+    'round_complete' |
     'game_complete'
 );
 
@@ -120,8 +121,16 @@ export class GameState {
                 if (log !== null) {
                     this.completeLog(log);
                 }
-                // initialise as separate state - keeps from doing too much at once
-                this.currentState = 'new_hand';
+                if (this.roundIsFinished) {
+                    this.currentState = 'round_complete';
+                } else {
+                    // initialise as separate state - keeps from doing too much at once
+                    this.currentState = 'new_hand';
+                }
+                break;
+            case 'round_complete':
+                // TODO: fill out once we have some options
+                this.currentState = 'game_complete';
                 break;
             case 'game_complete':
                 if (log !== null) {
@@ -356,6 +365,11 @@ export class GameState {
         );
     }
 
+    get roundIsFinished(): boolean {
+        // TODO: generalise!
+        return this.handNumber === 4;
+    }
+
     public moveFromIndex(cardToPlayIndex: number): number {
         const cardToPlay = Card.cardFromIndex(cardToPlayIndex, this.fullPack)
 
@@ -481,11 +495,6 @@ export class GameState {
             // TODO: calypso info?
         }
 
-        if (this.gameIsFinished) {
-            this.currentState = "game_complete";
-            return;
-        }
-
         this.previousTrick = this.trickInProgress
 
         // empty the trick, and increment the counter!
@@ -494,13 +503,8 @@ export class GameState {
         if (this.handNotFinished) {
             this.currentState = "play_card";
         } else {
-            this.currentState = "new_hand";
+            this.currentState = "hand_complete";
         }
-    }
-
-    get gameIsFinished(): boolean {
-        // TODO: do we handle this here?
-        return false;
     }
 
     completeLog(log: GameLog) {
