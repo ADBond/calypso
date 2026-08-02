@@ -16,8 +16,8 @@ export class GameLog {
     public dealerIndex: number = -1;
     public handNumber: number = -1;
     
-    // each trick is array of trick value, [card, playerIndex], along with winner index
-    private tricks: [number, [Card, number][], number][] = [];
+    // each trick is array of[card, playerIndex], along with winner index, and trickpile cards
+    private tricks: [[Card, number][], number, Card[]][] = [];
 
     public startingScores: number[] = [];
     public handScores: number[] = [];
@@ -36,12 +36,12 @@ export class GameLog {
         this.playerCount = players.length;
     }
 
-    captureTrick(score: number, trick: [Card, Player][], winnerIndex: number) {
+    captureTrick(trick: [Card, Player][], winnerIndex: number, trickpileCards: Card[]) {
         this.tricks.push(
             [
-                score,
                 trick.map(([card, player]) => [card, player.positionIndex]),
                 winnerIndex,
+                trickpileCards,
             ]
         );
     }

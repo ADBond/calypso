@@ -189,6 +189,11 @@ export class GameState {
         )[0];
     }
 
+    getPlayerPartner(player: Player) {
+        const partnersIndex = (player.positionIndex + 2) % this.numPlayers;
+        return this.players[partnersIndex];
+    }
+
     get prevTrickScores(): number[] {
         return this.players.map(player => player.previousScore);
     }
@@ -456,15 +461,24 @@ export class GameState {
         const winnerPlayer = this.trickWinnerPlayer();
         const winnerPlayerIndex = winnerPlayer.positionIndex;
         this.currentPlayerIndex = winnerPlayerIndex;
-        // TODO: not how scoring works here
-        const trickValue = this.updateScores(winnerPlayerIndex);
+        const winnersPartner = this.getPlayerPartner(winnerPlayer);
+
+        const winnerCards = this.trickInProgressCards.filter(card => Suit.suitEquals(card.suit, winnerPlayer.trumpSuit));
+        const partnerCards = this.trickInProgressCards.filter(card => Suit.suitEquals(card.suit, winnersPartner.trumpSuit));
+        const leftovers = this.trickInProgressCards.filter(
+            card => !Suit.suitEquals(card.suit, winnerPlayer.trumpSuit) && !Suit.suitEquals(card.suit, winnersPartner.trumpSuit)
+        );
+        leftovers.push(...winnerPlayer.processCalypsoCards(winnerCards));
+        leftovers.push(...winnersPartner.processCalypsoCards(partnerCards));
+        winnerPlayer.trickpile.push(...leftovers);
 
         if (log !== null) {
             log.captureTrick(
-                trickValue,
                 this.trickInProgress,
                 winnerPlayer.positionIndex,
+                leftovers,
             );
+            // TODO: calypso info?
         }
 
         if (this.gameIsFinished) {
@@ -482,11 +496,6 @@ export class GameState {
         } else {
             this.currentState = "new_hand";
         }
-    }
-
-    updateScores(winnerPlayerIndex: number, from: string = "trick"): number {
-        // TODO: do we even need this?
-        return 0;
     }
 
     get gameIsFinished(): boolean {
