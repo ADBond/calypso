@@ -8,5 +8,6 @@
     * ~~actual processing of them~~
 * display
 * ~~scoring~~
+    * score breakdown table(s ?)
 * fix ismcts implementation
 * multiround play
