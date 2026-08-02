@@ -7,6 +7,6 @@
 * ~~track calypso machinery~~
     * ~~actual processing of them~~
 * display
-* scoring
+* ~~scoring~~
 * fix ismcts implementation
 * multiround play

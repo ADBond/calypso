@@ -105,6 +105,9 @@ export class GameState {
         switch (state) {
             case 'new_round':
                 this.shuffle();
+                for (const player of this.players) {
+                    player.resetCards();
+                }
                 break;
             case 'new_hand':
                 this.dealCards(log);
@@ -130,6 +133,7 @@ export class GameState {
                 break;
             case 'round_complete':
                 // TODO: fill out once we have some options
+                this.updateScores();
                 this.currentState = 'game_complete';
                 break;
             case 'game_complete':
@@ -504,6 +508,18 @@ export class GameState {
             this.currentState = "play_card";
         } else {
             this.currentState = "hand_complete";
+        }
+    }
+
+    updateScores() {
+        const scores = [0, 0];
+        for (let i = 0; i < this.numPlayers; i++) {
+            const player = this.players[i];
+            scores[i % 2] += player.thisHandScore;
+        }
+        for (let i = 0; i < this.numPlayers; i++) {
+            const player = this.players[i];
+            player.scores.push(scores[i % 2]);
         }
     }
 

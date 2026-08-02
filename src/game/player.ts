@@ -4,6 +4,14 @@ import { Agent } from "./agent/agent";
 export const playerNameArr = ['player', 'comp1', 'comp2', 'comp3'] as const;
 export type PlayerName = typeof playerNameArr[number];
 
+const trickpileCardScore = 10;
+const inProgressCardScore = 20;
+const calypsoValues = [
+    500,  // 500
+    1250,  // 500 + 750
+    2250,  // 500 + 750 + 1000
+    3250,  // 500 + 750 + 1000 + 1000
+];
 
 export class Player {
     constructor(
@@ -45,6 +53,10 @@ export class Player {
         return this.scores.length === 0 ? 0 : this.scores[this.scores.length - 1];
     }
 
+    get thisHandScore(): number {
+        return calypsoValues[this.completedCalypsoes] + this.numCardsInCalypso * inProgressCardScore + this.trickpile.length * trickpileCardScore;
+    }
+
     get numCardsInCalypso(): number {
         return this.calypsoInProgress.size;
     }
@@ -52,6 +64,12 @@ export class Player {
     get calypsoIsComplete(): boolean {
         // TODO: more general?
         return this.numCardsInCalypso === 13;
+    }
+
+    resetCards() {
+        this.calypsoInProgress = new Set();
+        this.trickpile = [];
+        this.completedCalypsoes = 0;
     }
 
     private addCalypsoCards(cards: Card[]): Card[] {
