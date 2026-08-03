@@ -28,7 +28,6 @@ export type state = (
 export class GameState {
     public dealerIndex: number;
     public currentPlayerIndex: number;
-    public leaderIndex: number | null = null;
     public pack: Card[];
     public fullPack: Card[];
 
@@ -77,7 +76,6 @@ export class GameState {
         // copy remaining state
         newState.dealerIndex = this.dealerIndex;
         newState.currentPlayerIndex = this.currentPlayerIndex;
-        newState.leaderIndex = this.leaderIndex;
         newState.pack = [...this.pack];
         newState.fullPack = [...this.fullPack];
 
@@ -353,9 +351,15 @@ export class GameState {
         // if no trumps then highest of led suit
         // if trumps led, then highest trump wins (not counting leader if standard)
         // if no trumps then leader
+
+        // need to line up trump suits in same order as trick cards
+        const trumpSuitsFromLeader = this.trumpSuits;
+        for (let i = 0; i < this.trickInProgress[0][1].positionIndex; i++) {
+            rotArr(trumpSuitsFromLeader);
+        }
         const winningIndex = GameState.trickWinnerIndex(
             this.trickInProgressCards,
-            this.trumpSuits,  // TODO: need to rotate relative to trick
+            trumpSuitsFromLeader,
             this.config.trickplay,
         );
         return this.trickInProgress[winningIndex];
