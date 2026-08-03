@@ -31,12 +31,16 @@ export async function renderState(state: GameStateForUI) {
     const areaEl = document.createElement("div");
     const playedEl = document.createElement("div");
     const trumpEl = document.createElement("div");
+    const calypsoEl = document.createElement("div");
     areaEl.classList.add("player-area");
     areaEl.classList.add(`${p}-${n_players}`);
     playedEl.id = `played-${p}-${n_players}`;
     playedEl.classList.add("played");
+    calypsoEl.id = `calypso-${p}-${n_players}`;
+    calypsoEl.classList.add("calypso-holder");
     areaEl.appendChild(playedEl);
     areaEl.appendChild(trumpEl);
+    areaEl.appendChild(calypsoEl);
     gameBoard.appendChild(areaEl);
     if (p === state.dealer) {
       playedEl.classList.add('dealer');
@@ -55,6 +59,9 @@ export async function renderState(state: GameStateForUI) {
     }
     playedEl.appendChild(el);
     trumpEl.appendChild(createSuitElement(state.trumps[p].toStringShort()));
+    for(const calypsoCardStr of state.calypsoes[p]) {
+      calypsoEl.appendChild(createCardElement(calypsoCardStr));
+    }
   });
 
 

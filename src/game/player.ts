@@ -76,7 +76,7 @@ export class Player {
         const leftovers: Card[] = [];
         for (const card of cards) {
             const cardStr = card.toStringShort();
-            if (!this.calypsoInProgress.has(cardStr)) {
+            if (this.calypsoInProgress.has(cardStr)) {
                 leftovers.push(card);
             } else {
                 this.calypsoInProgress.add(cardStr);

@@ -139,7 +139,7 @@ export const RANKS: Rank[] = [
 ];
 
 // TODO: named instead?
-// TODO: fix to 'canonical' form from square? need to check what that is
+// 'canonical' form from square, starting arbitrarily
 const suitsData = [
     { name: "Diamonds", html: "&diams;"},
     { name: "Hearts", html: "&hearts;"},

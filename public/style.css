@@ -98,8 +98,8 @@ body {
 
 .game-board {
     position: relative;
-    width: 900px;
-    height: 450px;
+    width: 800px;
+    height: 800px;
     margin: 20px auto;
     border: 2px solid #fff;
     border-radius: 10px;
@@ -119,7 +119,7 @@ body {
 }
 
 .player-area.comp1-4 {
-    top: 160px;
+    top: 400px;
     left: 30px;
 }
 
@@ -130,7 +130,7 @@ body {
 }
 
 .player-area.comp3-4 {
-    top: 160px;
+    top: 400px;
     right: 30px;
 }
 
@@ -187,4 +187,8 @@ body {
     width: 32px;
     height: 32px;
     transform: scale(1.3);
+}
+
+.calypso-holder {
+    height: 100px;
 }

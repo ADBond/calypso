@@ -552,7 +552,7 @@ export class GameState {
             ) as Record<PlayerName, Suit>,
             calypsoes: Object.fromEntries(
                 this.players.map(
-                    (player) => [player.name, player.calypsoInProgress]
+                    (player) => [player.name, new Set(player.calypsoInProgress)]
                )
             ) as Record<PlayerName, Set<string>>,
             trickpiles: Object.fromEntries(
