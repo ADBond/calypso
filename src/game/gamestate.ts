@@ -355,7 +355,7 @@ export class GameState {
         // if no trumps then leader
         const winningIndex = GameState.trickWinnerIndex(
             this.trickInProgressCards,
-            this.trumpSuits,
+            this.trumpSuits,  // TODO: need to rotate relative to trick
             this.config.trickplay,
         );
         return this.trickInProgress[winningIndex];

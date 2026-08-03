@@ -204,3 +204,16 @@ export function shuffle(cards: Card[]) {
         [cards[i], cards[j]] = [cards[j], cards[i]];
     }
 }
+
+// these ones for testing - not specific instances
+export function makeCard(cardStringShort: string): Card {
+    const rank = getRank(cardStringShort[0]);
+    const suit = getSuit(cardStringShort[1]);
+    return getFullPack().filter(
+        (packCard) => Suit.suitEquals(packCard.suit, suit) && Rank.rankEquals(packCard.rank, rank)
+    )[0];
+}
+
+export function makeCards(cardStringsShort: string[]): Card[] {
+    return cardStringsShort.map(str => makeCard(str));
+}
