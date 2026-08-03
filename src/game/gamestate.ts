@@ -541,6 +541,11 @@ export class GameState {
             played: this.played,
             previous: this.previous,
 
+            trumps: Object.fromEntries(
+                this.players.map(
+                    (player) => [player.name, player.trumpSuit]
+               )
+            ) as Record<PlayerName, Suit>,
             calypsoes: Object.fromEntries(
                 this.players.map(
                     (player) => [player.name, player.calypsoInProgress]
@@ -584,6 +589,7 @@ export interface GameStateForUI {
     played: Record<PlayerName, Card | null | 'back'>;
     previous: Record<PlayerName, Card | null>;
 
+    trumps: Record<PlayerName, Suit>;
     calypsoes: Record<PlayerName, Set<string>>;
     trickpiles: Record<PlayerName, number>;
     completedCalypsoes: Record<PlayerName, number>;

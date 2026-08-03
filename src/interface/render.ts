@@ -1,4 +1,4 @@
-import { createCardElement } from './ui';
+import { createCardElement, createSuitElement } from './ui';
 import { GameStateForUI, state } from '../game/gamestate';
 import { PlayerName } from '../game/player';
 import { onHumanPlay } from './api';
@@ -30,11 +30,13 @@ export async function renderState(state: GameStateForUI) {
   state.playerNameArr.forEach(p => {
     const areaEl = document.createElement("div");
     const playedEl = document.createElement("div");
+    const trumpEl = document.createElement("div");
     areaEl.classList.add("player-area");
     areaEl.classList.add(`${p}-${n_players}`);
     playedEl.id = `played-${p}-${n_players}`;
     playedEl.classList.add("played");
     areaEl.appendChild(playedEl);
+    areaEl.appendChild(trumpEl);
     gameBoard.appendChild(areaEl);
     if (p === state.dealer) {
       playedEl.classList.add('dealer');
@@ -52,6 +54,7 @@ export async function renderState(state: GameStateForUI) {
       el.classList.add('played-card');
     }
     playedEl.appendChild(el);
+    trumpEl.appendChild(createSuitElement(state.trumps[p].toStringShort()));
   });
 
 
@@ -68,6 +71,7 @@ const delayMap: Record<state, number> = {
   play_card: 700,
   trick_complete: 1700,
   hand_complete: 3000,
+  round_complete: 500,
   new_hand: 10,
   game_complete: 10,
 }

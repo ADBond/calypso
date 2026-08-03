@@ -178,3 +178,13 @@ body {
     font-weight: bold;
     color: #aaf;
 }
+
+.suit-icon {
+    background-image: url('card_suits.png');
+    background-color: rgb(255, 255, 255);
+    display: inline-block;
+    border-radius: 5px;
+    width: 32px;
+    height: 32px;
+    transform: scale(1.3);
+}
