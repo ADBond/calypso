@@ -26,6 +26,8 @@ export async function renderState(state: GameStateForUI) {
 
   const gameBoard = document.getElementById("game-board")!;
   gameBoard.innerHTML = '';
+  const prevElContainer = document.getElementById("prev-area")!;
+  prevElContainer.innerHTML = '';
 
   state.playerNameArr.forEach(p => {
     const areaEl = document.createElement("div");
@@ -34,6 +36,14 @@ export async function renderState(state: GameStateForUI) {
     // imaginary square to hold calypso holder, for easy rotaters
     const playerCalypsoSquareEl = document.createElement("div");
     const calypsoEl = document.createElement("div");
+    const prevEl = document.createElement("div");
+    prevEl.id = `prev-${p}-${n_players}`;
+    prevEl.classList.add("prev-slot");
+    prevElContainer.appendChild(prevEl);
+    const prevCard = state.previous[p as PlayerName];
+    const pevCardEl = createCardElement(prevCard!== null ? prevCard.toStringShort() : "");
+    pevCardEl.classList.add('played-card');
+    prevEl.appendChild(pevCardEl);
     areaEl.classList.add("player-area");
     areaEl.classList.add(`${p}-${n_players}`);
     playedEl.id = `played-${p}-${n_players}`;

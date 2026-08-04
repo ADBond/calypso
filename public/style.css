@@ -139,10 +139,53 @@ body {
     margin: 5px 0;
 }
 
+.previous-trick {
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    width: 200px;
+    text-align: center;
+}
+
+.prev-area {
+    position: relative;
+    width: 100%;
+    height: 220px;
+}
+
+.prev-slot {
+    position: absolute;
+    transform: scale(0.75);
+    transform-origin: center center;
+}
+
+#prev-comp1-4 {
+    top: 60px;
+    left: 0;
+}
+
+#prev-comp2-4 {
+    top: 0;
+    right: 0;
+    left: 50%;
+    transform: translateX(-50%) scale(0.75);
+}
+
+#prev-comp3-4 {
+    top: 60px;
+    right: 0;
+}
+
+#prev-player-4 {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scale(0.75);
+}
+
 .played {
     height: 110px;
     position: absolute;
-    bottom: 170px;
+    bottom: 180px;
     left: 50%;
     transform: translateX(-50%);
 }
