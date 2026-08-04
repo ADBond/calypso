@@ -43,7 +43,7 @@ export async function renderState(state: GameStateForUI) {
     calypsoEl.id = `calypso-${p}-${n_players}`;
     calypsoEl.classList.add("calypso-holder");
     trumpEl.classList.add("suit-indicator");
-    areaEl.appendChild(playedEl);
+    playerCalypsoSquareEl.appendChild(playedEl);
     playerCalypsoSquareEl.appendChild(trumpEl);
     gameBoard.appendChild(playerCalypsoSquareEl);
     playerCalypsoSquareEl.appendChild(calypsoEl);

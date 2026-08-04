@@ -141,6 +141,10 @@ body {
 
 .played {
     height: 110px;
+    position: absolute;
+    bottom: 170px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .card {
