@@ -189,10 +189,6 @@ body {
     transform: scale(1.3);
 }
 
-.calypso-holder-square {
-
-}
-
 .calypso-holder {
     height: 120px;
     width: 370px;
@@ -201,6 +197,12 @@ body {
     position: absolute;
     bottom: 20px;
     left: 50px;
+}
+
+.suit-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 450px;
 }
 
 .calypso-holder .card {
@@ -213,7 +215,7 @@ body {
 }
 
 #calypso-holder-square-comp1-4 {
-  transform: rotate(90deg);
+    transform: rotate(90deg);
 }
 
 #calypso-holder-square-comp2-4 {
@@ -221,7 +223,7 @@ body {
 }
 
 #calypso-holder-square-comp3-4 {
-  transform: rotate(270deg);
+    transform: rotate(270deg);
 }
 
 .card-absent {
