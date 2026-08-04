@@ -6,7 +6,8 @@
 * ~~legal plays for allfours~~
 * ~~track calypso machinery~~
     * ~~actual processing of them~~
-* display
+* ~~display~~
+    * display trickpile / completed calypsoes
 * ~~scoring~~
     * score breakdown table(s ?)
 * fix ismcts implementation
