@@ -26,6 +26,8 @@ export function createCardElement(card: string, onClick?: () => void): HTMLEleme
     span.style.backgroundPosition = `-${col * cardWidth}px -${row * cardHeight}px`;
   } else if (card === "back") {
     span.classList.add("card-back");
+  } else if (card === "none") {
+    span.classList.add("card-absent");
   } else {
     span.style.background = "#ccc";    
   }

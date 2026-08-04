@@ -1,4 +1,4 @@
-import { Card, Suit, getFullPack, getSuits, rotArr, shuffle } from "./card";
+import { Card, RANKS, Suit, getFullPack, getSuits, rotArr, shuffle } from "./card";
 import { Player, PlayerName, playerNameArr } from "./player";
 import { Agent, AgentName, agentLookup } from "./agent/agent";
 import { GameLog } from "./log";
@@ -532,6 +532,21 @@ export class GameState {
         log.complete = true;
     }
 
+    // this probably shouldn't live here, but still...
+    static calypsoForDisplay(suit: Suit, cards: Set<string>): string[] {
+        const suitStr = suit.toStringShort();
+        const out: string[] = [];
+        for (const rank of RANKS) {
+            const card = `${rank.toStringShort()}${suitStr}`;
+            if (cards.has(card)) {
+                out.push(card);
+            } else{
+                out.push("none");
+            }
+        }
+        return out;
+    }
+
     getStateForUI(): GameStateForUI {
         return ({
             playerNameArr: this.players.map(player => player.name),
@@ -552,9 +567,9 @@ export class GameState {
             ) as Record<PlayerName, Suit>,
             calypsoes: Object.fromEntries(
                 this.players.map(
-                    (player) => [player.name, new Set(player.calypsoInProgress)]
+                    (player) => [player.name, GameState.calypsoForDisplay(player.trumpSuit, player.calypsoInProgress)]
                )
-            ) as Record<PlayerName, Set<string>>,
+            ) as Record<PlayerName, string[]>,
             trickpiles: Object.fromEntries(
                 this.players.map(
                     (player) => [player.name, player.trickpile.length]
@@ -594,7 +609,7 @@ export interface GameStateForUI {
     previous: Record<PlayerName, Card | null>;
 
     trumps: Record<PlayerName, Suit>;
-    calypsoes: Record<PlayerName, Set<string>>;
+    calypsoes: Record<PlayerName, string[]>;
     trickpiles: Record<PlayerName, number>;
     completedCalypsoes: Record<PlayerName, number>;
 

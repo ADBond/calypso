@@ -190,5 +190,16 @@ body {
 }
 
 .calypso-holder {
-    height: 100px;
+    height: 120px;
+    width: 370px;
+    background-color: #999;
+    border-radius: 5px;
+}
+
+.calypso-holder .card {
+    position: absolute;
+}
+
+.card-absent {
+    opacity: 0;
 }

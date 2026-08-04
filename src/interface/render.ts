@@ -59,8 +59,13 @@ export async function renderState(state: GameStateForUI) {
     }
     playedEl.appendChild(el);
     trumpEl.appendChild(createSuitElement(state.trumps[p].toStringShort()));
+    const offset = 22;
+    let offCounter = 0;
     for(const calypsoCardStr of state.calypsoes[p]) {
-      calypsoEl.appendChild(createCardElement(calypsoCardStr));
+      const calypsoCardEl = createCardElement(calypsoCardStr);
+      calypsoCardEl.style.left = `${offset * offCounter}px`;
+      calypsoEl.appendChild(calypsoCardEl);
+      offCounter++;
     }
   });
 
