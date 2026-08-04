@@ -31,16 +31,21 @@ export async function renderState(state: GameStateForUI) {
     const areaEl = document.createElement("div");
     const playedEl = document.createElement("div");
     const trumpEl = document.createElement("div");
+    // imaginary square to hold calypso holder, for easy rotaters
+    const playerCalypsoSquareEl = document.createElement("div");
     const calypsoEl = document.createElement("div");
     areaEl.classList.add("player-area");
     areaEl.classList.add(`${p}-${n_players}`);
     playedEl.id = `played-${p}-${n_players}`;
     playedEl.classList.add("played");
+    playerCalypsoSquareEl.id = `calypso-holder-square-${p}-${n_players}`;
+    playerCalypsoSquareEl.classList.add("calypso-holder-square");
     calypsoEl.id = `calypso-${p}-${n_players}`;
     calypsoEl.classList.add("calypso-holder");
     areaEl.appendChild(playedEl);
     areaEl.appendChild(trumpEl);
-    areaEl.appendChild(calypsoEl);
+    gameBoard.appendChild(playerCalypsoSquareEl);
+    playerCalypsoSquareEl.appendChild(calypsoEl);
     gameBoard.appendChild(areaEl);
     if (p === state.dealer) {
       playedEl.classList.add('dealer');
