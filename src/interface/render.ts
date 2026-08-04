@@ -41,9 +41,9 @@ export async function renderState(state: GameStateForUI) {
     prevEl.classList.add("prev-slot");
     prevElContainer.appendChild(prevEl);
     const prevCard = state.previous[p as PlayerName];
-    const pevCardEl = createCardElement(prevCard!== null ? prevCard.toStringShort() : "");
-    pevCardEl.classList.add('played-card');
-    prevEl.appendChild(pevCardEl);
+    const prevCardEl = createCardElement(prevCard!== null ? prevCard.toStringShort() : "");
+    prevCardEl.classList.add('played-card');
+    prevEl.appendChild(prevCardEl);
     areaEl.classList.add("player-area");
     areaEl.classList.add(`${p}-${n_players}`);
     playedEl.id = `played-${p}-${n_players}`;
@@ -87,7 +87,7 @@ export async function renderState(state: GameStateForUI) {
 
 
   // game status - config
-  document.getElementById('config')!.innerText = `calypso ruleset: ${state.trickplay}`;
+  document.getElementById('config')!.innerText = `Calypso ruleset: ${state.trickplay}`;
   // and current status
   document.getElementById('hand-number')!.innerText = `(hand #${state.handNumber}, trick #${state.trickNumber})`;
 
