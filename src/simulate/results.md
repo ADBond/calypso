@@ -13,3 +13,10 @@ Standard
   ismcts100: { played: 108, leaguePoints: 340, totalScore: 203580 }
 }
 ```
+
+```
+{
+  random: { played: 32, leaguePoints: -120, totalScore: 47420 },
+  ismcts1000: { played: 32, leaguePoints: 120, totalScore: 63300 }
+}
+```
