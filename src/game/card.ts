@@ -172,6 +172,19 @@ export function getSuit(shortName: string): Suit {
     return getSuits().filter(suitData => suitData.name[0] === shortName)[0];
 }
 
+// let's not be too clever
+export function handSortOrder(trumpSuit: Suit, suit: Suit) {
+    if (Suit.suitEquals(trumpSuit, suit)) {
+        return 4;
+    }
+    let arr = getSuits();
+    while (!Suit.suitEquals(arr[3], trumpSuit)) {
+        arr = rotArr(arr);
+    }
+    return arr.findIndex((value) => Suit.suitEquals(value, suit));
+
+}
+
 export function getRank(shortName: string): Rank {
     return RANKS.filter(rank => rank.toStringShort() === shortName)[0];
 }

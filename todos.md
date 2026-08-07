@@ -1,7 +1,7 @@
 # TODOlist
 
 * ~~assign personal suits~~
-    * sort hand on this basis
+    * ~~sort hand on this basis~~
 * ~~trick winner~~
 * ~~legal plays for allfours~~
 * ~~track calypso machinery~~
