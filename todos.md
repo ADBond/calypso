@@ -10,5 +10,5 @@
     * display trickpile / completed calypsoes
 * ~~scoring~~
     * score breakdown table(s ?)
-* fix ismcts implementation
+* ~~fix ismcts implementation~~
 * multiround play

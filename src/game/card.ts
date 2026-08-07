@@ -87,6 +87,10 @@ export class Card {
         return Rank.rankEquals(c1.rank, c2.rank) && Suit.suitEquals(c1.suit, c2.suit);
     }
 
+    static cardIdentical(c1: Card, c2: Card): boolean {
+        return c1.index === c2.index;
+    }
+
     static cardFromIndex(index: number, pack: Card[]): Card {
         const cards = pack.filter(card => card.index === index);
         if (cards.length !== 1) {

@@ -70,10 +70,10 @@ export class ISMCTSNode {
 
 function determiniseNaive(state: GameState, agent: ComputerAgent): GameState {
     const newState = state.clone();
-    const unknownCards = state.pack.filter(
+    const unknownCards = state.fullPack.filter(
         card => 
-            (!state.currentPlayerHand.some(handCard => Card.cardEquals(card, handCard))) &&
-            (!state.playedCards.some(playedCard => Card.cardEquals(card, playedCard)))
+            (!state.currentPlayerHand.some(handCard => Card.cardIdentical(card, handCard))) &&
+            (!state.playedCards.some(playedCard => Card.cardIdentical(card, playedCard)))
     )
     shuffle(unknownCards);
     for (let playerIndex = 0; playerIndex < state.numPlayers; playerIndex++) {
@@ -101,24 +101,34 @@ export async function ismcts(
     rootState: GameState,
     rolloutAgent: ComputerAgent,
     iterations: number = 10,
-    c: number = 15,
-    rolloutDiscount: number = 0.8,
-    winningIncentive: boolean = false,
+    c: number = 600,
 ): Promise<[number, ISMCTSNode]> {
     // console.log(`ISMCTS called ${Math.random()}`);
     const initialPlayerIndex = rootState.currentPlayerIndex;
     const initialScores = zeroSum(rootState.scores);
     const rootNode = new ISMCTSNode(initialPlayerIndex);
-    const nPlayers = rootState.numPlayers;
+    const numPlayers = rootState.numPlayers;
+
+    const terminalStates = ["hand_complete", "game_complete", "round_complete"];
+    const dealingStates = ["new_hand", "new_round"];
+    const nonDecisionStates = terminalStates.concat(dealingStates);
+
     let maxDepth = 0;
     let depth;
+
     for (let i = 0; i < iterations; i++) {
-        // console.log(`ISMCTS iteration ${i}`);
         let state = determinise(rootState, rolloutAgent);
+
+        // if determinise() can hand back a state sitting on new_hand/new_round,
+        // fast-forward it to the first real decision/terminal point up front
+        while (dealingStates.includes(state.currentState)) {
+            await state.increment();
+        }
+
         let node = rootNode;
-        let treeRewards = Array(nPlayers).fill(0.0);
-        // walk down tree until we get a node to expand
-        while (!["hand_complete", "game_complete"].includes(state.currentState)) {
+
+        // walk down tree until we hit a node to expand or a terminal state
+        while (!terminalStates.includes(state.currentState)) {
             let legalMoves = state.legalMoveIndices;
             let currentPlayerIndex = state.currentPlayerIndex;
             node.ensureChildrenExist(currentPlayerIndex, legalMoves);
@@ -130,65 +140,45 @@ export async function ismcts(
             let justExpanded = false;
             let untriedNodes = node.untriedNodes(legalMoves);
             if (untriedNodes.length > 0) {
-                // console.log("Trying a new node");
                 node = randomArrayElement(untriedNodes);
                 justExpanded = true;
             } else {
-                // console.log("Picking something good");
-                // tried everything at least once - use UCB to decide where to go
                 node = node.bestChildByUCB(legalMoves, c);
             }
+
             state.moveFromIndex(node.move);
-            // check if we can finish a trick and allocate rewards
-            while (!["play_card", "hand_complete", "game_complete"].includes(state.currentState)) {
-                let initialState = state.currentState;
-                await state.increment();
-                if (["trick_complete", "process_cachette"].includes(initialState)) {
-                    let trick = state.prevTrickScores;
-                    for (let j = 0; j < trick.length; j++) {
-                        if (winningIncentive) {
-                            treeRewards[j] += trick[j];
-                        } else {
-                            treeRewards[j] += -trick.reduce((a, b) => a + b, 0);
-                        }
-                    }
-                }
-            }
             if (justExpanded) {
                 break;
             }
-        }
-        let rolloutRewards = Array(nPlayers).fill(0.0);
 
-        while (!["hand_complete", "game_complete"].includes(state.currentState)) {  // false positive
-            // console.log(`Rollout for ${i}... (${state.currentState}, hand is ${state.handNumber})`);
-            let initialState = state.currentState;
-            await state.increment();
-            if (initialState === "trick_complete") {
-                let trick = state.prevTrickScores;
-                for (let j = 0; j < trick.length; j++) {
-                    if (winningIncentive) {
-                        rolloutRewards[j] += trick[j];
-                    } else {
-                        rolloutRewards[j] += -trick.reduce((a, b) => a + b, 0);
-                    }
-                }
+            // roll forwards through dealing states to the next action state, or terminal state
+            while (!nonDecisionStates.concat("play_card").includes(state.currentState)) {
+                await state.increment();
+            }
+            // land cleanly on play_card if we're currently sat on a dealing state
+            while (dealingStates.includes(state.currentState)) {
+                await state.increment();
             }
         }
-        let treeZeroSum: number[];
-        let rolloutZeroSum: number[];
-        if (winningIncentive) {
-            treeZeroSum = zeroSum(treeRewards);
-            rolloutZeroSum = zeroSum(rolloutRewards);
-        } else {
-            treeZeroSum = treeRewards;
-            rolloutZeroSum = rolloutRewards;
+
+        // rollout: play until the end of round when we get score info
+        while (!["round_complete"].includes(state.currentState)) {
+            await state.increment();
         }
 
-        let result = Array(nPlayers).fill(0.0);
-        for (let j = 0; j < result.length; j++) {
-            result[j] = treeZeroSum[j] + rolloutDiscount * rolloutZeroSum[j] - initialScores[j];
+        // TODO: probably some partial scores hand-to-hand would be useful...
+        if (state.currentState === "round_complete") {
+            await state.increment();
         }
+
+        const rolloutRewards = state.scores;
+        const rolloutZeroSum = zeroSum(rolloutRewards);
+
+        let result = Array(numPlayers).fill(0.0);
+        for (let j = 0; j < result.length; j++) {
+            result[j] = rolloutZeroSum[j] - initialScores[j];
+        }
+
         depth = 0;
         while (true) {
             depth += 1;
@@ -200,16 +190,12 @@ export async function ismcts(
                 break;
             }
             node = node.parent;
-            // console.log(`Depth: ${depth}`);
         }
         maxDepth = Math.max(depth, maxDepth);
-        // console.log(`Iteration ${i} complete`);
     }
-    // console.log(`ISMCTS complete, ${iterations} iterations, maximum tree depth ${maxDepth}`);
+
     const highestVisits = Math.max(
-        ...Object.values(rootNode.children).map(
-            node => node.visits
-        )
+        ...Object.values(rootNode.children).map(node => node.visits)
     );
     const bestChild = Object.values(rootNode.children).filter(
         node => node.visits === highestVisits
