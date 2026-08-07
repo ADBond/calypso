@@ -181,14 +181,14 @@ export class GameState {
             // TODO: trickplay switching
             // following suit is always legal
             legalCards = hand.filter(card => Suit.suitEquals(card.suit, ledSuit));
-            // in All Fours Calypso we may also always play a trump
-            if (this.config.trickplay === 'allfours') {
-                const trumpHandCards = hand.filter(card => Suit.suitEquals(card.suit, this.currentPlayerTrumpSuit));
-                legalCards.push(...trumpHandCards);
-            }
             if (legalCards.length === 0) {
                 // if we have no cards of led suit, anything is legal
                 legalCards = hand;
+            } else if (this.config.trickplay === 'allfours') {
+                // if we do have cards of led suit, 
+                // in All Fours Calypso we may also play a trump
+                const trumpHandCards = hand.filter(card => Suit.suitEquals(card.suit, this.currentPlayerTrumpSuit));
+                legalCards.push(...trumpHandCards);
             }
         }
         return legalCards.map(card => card.index);
