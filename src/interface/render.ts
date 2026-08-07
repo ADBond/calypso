@@ -91,6 +91,78 @@ export async function renderState(state: GameStateForUI) {
   // and current status
   document.getElementById('hand-number')!.innerText = `(hand #${state.handNumber}, trick #${state.trickNumber})`;
 
+  // scores on the doors
+  const scoresTableEl = document.getElementById('scores-table') as HTMLTableElement;
+
+  const myPartnershipDisplay = 'Player & N';
+  const theirPartnershipDisplay = 'E & W';
+  const nameLookup = {
+    player: myPartnershipDisplay,
+    comp1: theirPartnershipDisplay,
+  } as const;
+  const displayName = {
+    player: 'Player',
+    comp1: 'W',
+    comp2: 'N',
+    comp3: 'E',
+  };
+
+  type Partnership = keyof typeof nameLookup;
+
+  scoresTableEl.replaceChildren();
+
+  const headerRow = document.createElement('tr');
+  for (const title of ['Partnership', 'Score', 'Details']) {
+    const th = document.createElement('th');
+    th.textContent = title;
+    if (title === 'Details') {
+      th.colSpan = 4;
+    } else {
+      th.rowSpan = 2;
+    }
+    headerRow.appendChild(th);
+  }
+  scoresTableEl.appendChild(headerRow);
+  const subHeadRow = document.createElement('tr');
+  for (const subTitle of ['Player', 'C', 'P', 'T']) {
+    const th = document.createElement('th');
+    th.textContent = subTitle;
+    subHeadRow.appendChild(th);
+  }
+  scoresTableEl.appendChild(subHeadRow);
+
+  // need a specific order
+  const playerNames: PlayerName[] = ['player', 'comp2', 'comp1', 'comp3'];
+  for (const player of playerNames) {
+    const row = document.createElement('tr');
+
+    const rowEls: Element[] = [];
+    if (Object.keys(nameLookup).includes(player)) {
+
+      const partnershipTd = document.createElement('td');
+      partnershipTd.textContent = nameLookup[player as Partnership];
+      partnershipTd.classList.add('player-name');
+      partnershipTd.rowSpan = 2;
+
+      const scoreTd = document.createElement('td');
+      scoreTd.textContent = String(state.scores[player]);
+      scoreTd.rowSpan = 2;
+
+      rowEls.push(partnershipTd, scoreTd);
+    }
+
+    const nameTd = document.createElement('td');
+    nameTd.textContent = displayName[player];
+    const calTd = document.createElement('td');
+    calTd.textContent = String(state.scoreDetails[player].calypsoes);
+    const calPartTd = document.createElement('td');
+    calPartTd.textContent = String(state.scoreDetails[player].calypsoPart);
+    const trickpileTd = document.createElement('td');
+    trickpileTd.textContent = String(state.scoreDetails[player].trickpiles);
+
+    row.append(...rowEls, nameTd, calTd, calPartTd, trickpileTd);
+    scoresTableEl.appendChild(row);
+  }
 
 }
 

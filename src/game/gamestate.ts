@@ -1,5 +1,5 @@
 import { Card, RANKS, Suit, getFullPack, getSuits, rotArr, shuffle } from "./card";
-import { Player, PlayerName, playerNameArr } from "./player";
+import { Player, PlayerName, playerNameArr, ScoreDetails } from "./player";
 import { Agent, AgentName, agentLookup } from "./agent/agent";
 import { GameLog } from "./log";
 
@@ -591,6 +591,11 @@ export class GameState {
                     (player) => [player.name, player.previousScore]
                )
             ) as Record<PlayerName, number>,
+            scoreDetails: Object.fromEntries(
+                this.players.map(
+                    (player) => [player.name, player.scoreDetails]
+               )
+            ) as Record<PlayerName, ScoreDetails>,
 
             gameState: this.currentState,
             whoseTurn: this.currentPlayer.name,
@@ -615,6 +620,7 @@ export interface GameStateForUI {
 
     scores: Record<PlayerName, number>,
     prevScores: Record<PlayerName, number>,
+    scoreDetails: Record<PlayerName, ScoreDetails>,
 
     handNumber: number;
     trickNumber: number;

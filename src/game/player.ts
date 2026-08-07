@@ -13,6 +13,26 @@ const calypsoValues = [
     3250,  // 500 + 750 + 1000 + 1000
 ];
 
+export class ScoreDetails {
+    constructor(
+        public calypsoes: number,
+        public calypsoPart: number,
+        public trickpiles: number,
+    ) {}
+
+    clone(): ScoreDetails {
+        return new ScoreDetails(
+            this.calypsoes,
+            this.calypsoPart,
+            this.trickpiles
+        );
+    }
+
+    get score(): number {
+        return calypsoValues[this.calypsoes] + this.calypsoPart* inProgressCardScore + this.trickpiles * trickpileCardScore;
+    }
+}
+
 export class Player {
     constructor(
         public displayName: string,
@@ -53,8 +73,12 @@ export class Player {
         return this.scores.length === 0 ? 0 : this.scores[this.scores.length - 1];
     }
 
+    get scoreDetails(): ScoreDetails {
+        return new ScoreDetails(this.completedCalypsoes, this.numCardsInCalypso, this.trickpile.length);
+    }
+
     get thisHandScore(): number {
-        return calypsoValues[this.completedCalypsoes] + this.numCardsInCalypso * inProgressCardScore + this.trickpile.length * trickpileCardScore;
+        return this.scoreDetails.score;
     }
 
     get numCardsInCalypso(): number {

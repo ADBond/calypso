@@ -9,6 +9,6 @@
 * ~~display~~
     * display trickpile / completed calypsoes
 * ~~scoring~~
-    * score breakdown table(s ?)
+    * ~~score breakdown table(s ?)~~
 * ~~fix ismcts implementation~~
 * multiround play

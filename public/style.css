@@ -303,3 +303,44 @@ body {
 .card-absent {
     opacity: 0;
 }
+
+.scores-container {
+    position: absolute;
+    left: 20px;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.scores {
+    background: #ffffff;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    min-width: 260px;
+}
+
+.scores-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.scores-table th {
+    font-weight: 600;
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid #ddd;
+    color: #444;
+}
+
+.scores-table td {
+    padding: 0.4rem 0.5rem;
+}
+
+.player-name {
+    font-weight: 500;
+}
+
+.scores-table td {
+    color: black;
+}
