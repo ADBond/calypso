@@ -26,10 +26,11 @@ export async function simulate(agents: AgentName[]): Promise<Game> {
 
     // console.log(game.logs);
     // console.log(counter);
+    // console.log(game.state.scores);
     return game;
 }
 
-export async function simulateHand(player: AgentName): Promise<[number[], GameLog]> {
+export async function simulateRound(player: AgentName): Promise<[number[], GameLog]> {
     const config: GameConfig = {
         trickplay: 'standard',
     };
@@ -39,7 +40,7 @@ export async function simulateHand(player: AgentName): Promise<[number[], GameLo
     let counter = 0;
     const maxCounter = 15000;  // should be enough, i think?
 
-    while ((current.gameState !== 'hand_complete') && counter < maxCounter) {
+    while ((current.gameState !== 'round_complete') && counter < maxCounter) {
         // console.log("state...")
         await game.incrementState();
         current = game.getGameStateForUI();
@@ -56,7 +57,7 @@ export async function simulateN(agents: AgentName[], n: number): Promise<Partial
     for (let index = 0; index < n; index++) {
         console.log(`Simulating: ${index}`)
         game = await simulate(agents);
-        let finalScores = game.logs[game.logs.length - 1].finalScores;
+        let finalScores = game.state.scores;
         let winningScore = Math.max(...finalScores);
         let losingScore = Math.min(...finalScores);
         gameRecord = [];

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { simulateHand } from "./simulate";
+import { simulateRound } from "./simulate";
 
 async function main() {
   console.log("Simulating games");
@@ -14,7 +14,7 @@ async function main() {
 
   for (let i = 0; i < n; i++) {
     console.log(i);
-    const [scores, log] = await simulateHand('ismcts1000');
+    const [scores, log] = await simulateRound('ismcts1000');
     const tot = scores[0] + scores[1];
     totals.push(tot);
     const outDir = path.resolve(process.cwd(), 'output');
