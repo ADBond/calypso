@@ -7,6 +7,7 @@ export type PlayerName = typeof playerNameArr[number];
 const trickpileCardScore = 10;
 const inProgressCardScore = 20;
 const calypsoValues = [
+    0,  // no calypsoes
     500,  // 500
     1250,  // 500 + 750
     2250,  // 500 + 750 + 1000
