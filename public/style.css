@@ -1,7 +1,7 @@
 html, body {
     height: 100%;
     margin: 0;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 body {
@@ -243,6 +243,8 @@ body {
 }
 
 .hand {
+    position: relative;
+    top: 30px;
     margin-top: 30px;
     height: 110px;
 }
@@ -343,4 +345,14 @@ body {
 
 .scores-table td {
     color: black;
+}
+
+@media (max-width: 1520px) {
+    .game-board {
+        top: 300px;
+    }
+
+    .hand {
+        top: 300px;
+    }
 }
