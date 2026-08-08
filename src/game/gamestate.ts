@@ -19,9 +19,20 @@ interface ClassicConfig extends BaseGameConfig {
 
 interface EmbersConfig extends BaseGameConfig {
     gamemode: 'embers',
+    numHands: number,
     packs: number,
     sitout: number,
 }
+// default values 3, 1
+// start off with 'packs' packs in green room
+// we have 'sitout' sin bins. this can be at most 2 fewer than the number of packs
+// each hand we play as usual
+// at end of each we score calypsoes and trickpile cards
+// we move all (n-1)th sinbin to nth sinbin
+// the maximum sinbin number (i.e. #2 for sitout === 2) gets added to greenroom
+// we put all trickpile cards into the 1st sinbin
+// we then deal next hand from greenroom, and repeat
+// carry on until final hand when we also score partials
 
 export type GameConfig = ClassicConfig | EmbersConfig;
 
@@ -39,6 +50,7 @@ function copyConfig(config: GameConfig): GameConfig {
             return {
                 gamemode: 'embers',
                 ...base,
+                numHands: config.numHands,
                 packs: config.packs,
                 sitout: config.sitout,
             }
