@@ -4,14 +4,27 @@ import { Agent, AgentName, agentLookup } from "./agent/agent";
 import { GameLog } from "./log";
 
 export type TrickPlayOption = 'standard' | 'allfours';
+export type GameMode = 'classic' | 'embers';
 
-export type GameConfig = {
+interface BaseGameConfig {
     trickplay: TrickPlayOption,
+    gamemode: GameMode,
 }
+
+interface ClassicConfig extends BaseGameConfig {
+    gamemode: 'classic',
+}
+
+interface EmbersConfig extends BaseGameConfig {
+    gamemode: 'embers',
+}
+
+export type GameConfig = ClassicConfig | EmbersConfig;
 
 function copyConfig(config: GameConfig): GameConfig {
     return {
         trickplay: config.trickplay,
+        gamemode: config.gamemode,
     };
 }
 

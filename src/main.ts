@@ -12,6 +12,7 @@ async function loadGame(config: GameConfig) {
 
 const DEFAULTS: GameConfig = {
   trickplay: 'standard',
+  gamemode: 'classic',
 };
 
 
@@ -42,6 +43,7 @@ form.addEventListener("submit", async (e) => {
   const trickplay = formData.get("trickplay") as TrickPlayOption;
   const config: GameConfig = {
     trickplay: trickplay,
+    gamemode: 'classic',  // TODO
   }
 
   menu.hidden = true;
