@@ -13,19 +13,38 @@ interface BaseGameConfig {
 
 interface ClassicConfig extends BaseGameConfig {
     gamemode: 'classic',
+    // TODO: rounds
+    // TODO: could we include packs - lifting it up to base in reality?
 }
 
 interface EmbersConfig extends BaseGameConfig {
     gamemode: 'embers',
+    packs: number,
+    sitout: number,
 }
 
 export type GameConfig = ClassicConfig | EmbersConfig;
 
 function copyConfig(config: GameConfig): GameConfig {
-    return {
+    const base = {
         trickplay: config.trickplay,
-        gamemode: config.gamemode,
     };
+    switch(config.gamemode) {
+        case 'classic':
+            return {
+                gamemode: 'classic',
+                ...base,
+            };
+        case 'embers':
+            return {
+                gamemode: 'embers',
+                ...base,
+                packs: config.packs,
+                sitout: config.sitout,
+            }
+        default:
+            throw new Error(`Unexpected config gamemode value! ${JSON.stringify(config)}`);
+    }
 }
 
 export type state = (
