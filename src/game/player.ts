@@ -32,6 +32,14 @@ export class ScoreDetails {
     get score(): number {
         return calypsoValues[this.calypsoes] + this.calypsoPart* inProgressCardScore + this.trickpiles * trickpileCardScore;
     }
+
+    toJSON() {
+        return {
+            completedCalypsoes: this.calypsoes,
+            calypsoesInProgressCards: this.calypsoPart,
+            trickpile: this.trickpiles,
+        };
+    }
 }
 
 export class Player {

@@ -528,7 +528,7 @@ export class GameState {
     }
 
     completeLog(log: GameLog) {
-        log.handScores = this.scores;
+        log.handScores = this.players.map(p => p.scoreDetails);
         log.complete = true;
     }
 

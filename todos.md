@@ -12,6 +12,7 @@
     * ~~score breakdown table(s ?)~~
 * ~~fix ismcts implementation~~
 * multiround play
+* ~~logs~~
 
 ## Bugs
 

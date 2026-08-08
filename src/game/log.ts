@@ -1,5 +1,5 @@
 import { Card, Suit } from "./card";
-import { Player } from "./player";
+import { Player, ScoreDetails } from "./player";
 import { GameConfig } from "./gamestate";
 import { AgentName } from "./agent/agent";
 import { getCommitHash } from "../utils/commit";
@@ -8,8 +8,6 @@ declare const __COMMIT_HASH__: string;
 
 export class GameLog {
     private hands: Card[][] = [];
-    public cachette: Card[] = [];
-    public cachetteValue: number = -1;
 
     private playerCount: number;
 
@@ -20,11 +18,11 @@ export class GameLog {
     private tricks: [[Card, number][], number, Card[]][] = [];
 
     public startingScores: number[] = [];
-    public handScores: number[] = [];
+    public handScores: ScoreDetails[] = [];
 
     public complete: boolean = false;
     private version: string = getCommitHash();
-    private logVersion: number = 0;
+    private logVersion: number = 1;
     private game: string = 'calypso';
 
     constructor(
@@ -62,7 +60,7 @@ export class GameLog {
     get finalScores(): number[] {
         return Array.from(
             this.startingScores,
-            (_, i) => this.startingScores[i] + this.handScores[i]
+            (_, i) => this.startingScores[i] + this.handScores[i].score
         );
     }
 
@@ -73,9 +71,6 @@ export class GameLog {
 
 // send game log to storage
 export async function sendGameLog(log: GameLog) {
-    return;  // TODO: restore when we have a version
-    // console.log("Game Log:");
-    // console.log(log);
     try {
         const res = await fetch("https://qaw-games.netlify.app/.netlify/functions/saveGameLog", {
             method: "POST",
