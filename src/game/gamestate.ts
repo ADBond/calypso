@@ -72,7 +72,8 @@ export type state = (
 export class GameState {
     public dealerIndex: number;
     public currentPlayerIndex: number;
-    public pack: Card[];
+    public greenroom: Card[] = [];
+    public sinbins: Card[][];
     public fullPack: Card[];
 
     public players: Player[] = [];
@@ -107,8 +108,11 @@ export class GameState {
         // dummy values:
         this.currentPlayerIndex = 0;
         this.trickIndex = 0;
-        this.pack = getFullPack();
-        this.fullPack = getFullPack();  // only need if we have variable sizes
+
+        const numPacks = (this.config.gamemode === "embers") ? this.config.packs : 4;
+        this.fullPack = getFullPack(numPacks);  // only need if we have variable sizes
+        this.resetPack();
+        this.sinbins = [];
     }
 
     public clone(): GameState {
@@ -120,7 +124,7 @@ export class GameState {
         // copy remaining state
         newState.dealerIndex = this.dealerIndex;
         newState.currentPlayerIndex = this.currentPlayerIndex;
-        newState.pack = [...this.pack];
+        newState.greenroom = [...this.greenroom];
         newState.fullPack = [...this.fullPack];
 
         newState.players = this.players.map(player => player.clone());
@@ -146,12 +150,18 @@ export class GameState {
         // console.log(`Incrementing state - currently: ${state}`);
         switch (state) {
             case 'new_round':
+                this.resetPack();
                 this.shuffle();
                 for (const player of this.players) {
                     player.resetCards();
                 }
+                this.currentState = 'new_hand';
                 break;
             case 'new_hand':
+                if (this.config.gamemode === 'embers') {
+                    // shuffle at the start of each hand in embers format
+                    this.shuffle();
+                }
                 this.dealCards(log);
                 break;
             case 'play_card':
@@ -161,6 +171,7 @@ export class GameState {
                 this.resetTrick(log);
                 break;
             case 'hand_complete':
+                this.processCards();
                 this.dealerIndex = this.getNextPlayerIndex(this.dealerIndex);
 
                 if (log !== null) {
@@ -490,17 +501,20 @@ export class GameState {
         return true;
     }
 
+    resetPack(): void {
+        this.greenroom = [...this.fullPack];
+    }
+
     shuffle(): void {
-        const pack = getFullPack();
+        const pack = this.greenroom;
         shuffle(pack);
-        this.pack = pack;
+        this.greenroom = pack;
         this.playedCards = [];
-        this.currentState = 'new_hand';
     }
 
     // TODO: seed?
     dealCards(log: GameLog | null): void {
-        const pack = this.pack;
+        const pack = this.greenroom;
         for (let i = 0; i < this.cardsPerHand; i++) {
             for (let playerIndex = 0; playerIndex < this.numPlayers; playerIndex++) {
                 const card = pack.pop();
@@ -556,6 +570,19 @@ export class GameState {
             this.currentState = "play_card";
         } else {
             this.currentState = "hand_complete";
+        }
+    }
+
+    processCards() {
+        if (this.config.gamemode === 'classic') {
+            return;
+        }
+        const numSinbins = this.config.sitout;
+        const forSinbin: Card[] = [];  
+        this.sinbins.unshift(forSinbin);
+        if (this.sinbins.length === numSinbins + 1) {
+            const forGreenroom = this.sinbins.pop()!;  // TODO: + calypsoes
+            this.greenroom.push(...forGreenroom);
         }
     }
 
