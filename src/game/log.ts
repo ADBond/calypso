@@ -22,7 +22,7 @@ export class GameLog {
 
     public complete: boolean = false;
     private version: string = getCommitHash();
-    private logVersion: number = 1;
+    private logVersion: number = 2;
     private game: string = 'calypso';
 
     constructor(
