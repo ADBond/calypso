@@ -74,6 +74,8 @@ export class GameState {
     public currentPlayerIndex: number;
     public greenroom: Card[] = [];
     public sinbins: Card[][];
+    public forSinbin: Card[] = [];
+    public forGreenRoom: Card[] = [];
     public fullPack: Card[];
 
     public players: Player[] = [];
@@ -430,7 +432,11 @@ export class GameState {
 
     get roundIsFinished(): boolean {
         // TODO: generalise!
-        return this.handNumber === 4;
+        if (this.config.gamemode === 'classic') {
+            return this.handNumber === 4;
+        }
+        // embers
+        return this.handNumber === this.config.numHands;
     }
 
     public moveFromIndex(cardToPlayIndex: number): number {
@@ -551,6 +557,17 @@ export class GameState {
         leftovers.push(...winnerPlayer.processCalypsoCards(winnerCards));
         leftovers.push(...winnersPartner.processCalypsoCards(partnerCards));
         winnerPlayer.trickpile.push(...leftovers);
+        if (this.config.gamemode === 'embers') {
+            this.forSinbin.push(...leftovers);
+            if (winnerPlayer.oldCalypso.numCards !== 0) {
+                this.forGreenRoom.push(...winnerPlayer.oldCalypso.cards);
+                winnerPlayer.resetOldCalypso();
+            }
+            if (winnersPartner.oldCalypso.numCards !== 0) {
+                this.forGreenRoom.push(...winnersPartner.oldCalypso.cards);
+                winnersPartner.resetOldCalypso();
+            }
+        }
 
         if (log !== null) {
             log.captureTrick(
@@ -578,11 +595,14 @@ export class GameState {
             return;
         }
         const numSinbins = this.config.sitout;
-        const forSinbin: Card[] = [];  
+        const forSinbin: Card[] = this.forSinbin;
         this.sinbins.unshift(forSinbin);
+        this.forSinbin = [];
         if (this.sinbins.length === numSinbins + 1) {
-            const forGreenroom = this.sinbins.pop()!;  // TODO: + calypsoes
+            const forGreenroom = this.sinbins.pop()!;
+            forGreenroom.push(...this.forGreenRoom);
             this.greenroom.push(...forGreenroom);
+            this.forGreenRoom = [];
         }
     }
 
@@ -604,12 +624,13 @@ export class GameState {
     }
 
     // this probably shouldn't live here, but still...
-    static calypsoForDisplay(suit: Suit, cards: Set<string>): string[] {
+    static calypsoForDisplay(suit: Suit, cards: Card[]): string[] {
         const suitStr = suit.toStringShort();
+        const cardStrs = cards.map(card => card.toStringShort());
         const out: string[] = [];
         for (const rank of RANKS) {
             const card = `${rank.toStringShort()}${suitStr}`;
-            if (cards.has(card)) {
+            if (cardStrs.includes(card)) {
                 out.push(card);
             } else{
                 out.push("none");
@@ -638,7 +659,7 @@ export class GameState {
             ) as Record<PlayerName, Suit>,
             calypsoes: Object.fromEntries(
                 this.players.map(
-                    (player) => [player.name, GameState.calypsoForDisplay(player.trumpSuit, player.calypsoInProgress)]
+                    (player) => [player.name, GameState.calypsoForDisplay(player.trumpSuit, player.calypsoInProgress.cards)]
                )
             ) as Record<PlayerName, string[]>,
             trickpiles: Object.fromEntries(
