@@ -89,7 +89,11 @@ export async function renderState(state: GameStateForUI) {
 
 
   // game status - config
-  document.getElementById('config')!.innerText = `Calypso ruleset: ${state.trickplay}`;
+  const config = state.config;
+  const configDetailsText = config.gamemode === 'classic' ? `` :
+    `(${config.numHands} hands, ${config.packs} packs, ${config.sitout} sitouts)`;
+  document.getElementById('config')!.innerText = 
+    `Trickplay: ${config.trickplay}, format: ${config.gamemode} ${configDetailsText}`;
   // and current status
   document.getElementById('hand-number')!.innerText = `(hand #${state.handNumber}, trick #${state.trickNumber})`;
 

@@ -642,7 +642,7 @@ export class GameState {
     getStateForUI(): GameStateForUI {
         return ({
             playerNameArr: this.players.map(player => player.name),
-            trickplay: this.config.trickplay,
+            config: this.config,
             hands: {
                 player: this.currentState === "hand_complete" ? [] : this.humanHand.slice(),
                 comp1: [],
@@ -716,7 +716,7 @@ export interface GameStateForUI {
 
     handNumber: number;
     trickNumber: number;
-    trickplay: TrickPlayOption,
+    config: GameConfig,
 
     gameState: state;
     whoseTurn: PlayerName;
