@@ -1,7 +1,7 @@
 import { playUntilHuman } from './interface/api';
 import { renderWithDelays } from './interface/render';
 import { newGame } from './interface/game';
-import { GameConfig, TrickPlayOption } from './game/gamestate';
+import { GameConfig, GameMode, TrickPlayOption } from './game/gamestate';
 
 async function loadGame(config: GameConfig) {
   newGame(config);
@@ -25,6 +25,10 @@ function resetValues() {
     `input[name="trickplay"][value="${DEFAULTS.trickplay}"]`
   ) as HTMLInputElement).checked = true;
 
+  (form.querySelector(
+    `input[name="gamemode"][value="${DEFAULTS.gamemode}"]`
+  ) as HTMLInputElement).checked = true;
+
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -36,18 +40,60 @@ button.addEventListener("click", () => {
   menu.hidden = !menu.hidden;
 });
 
+const modeInputs = form.querySelectorAll<HTMLInputElement>('input[name="gamemode"]');
+const modeGroups = form.querySelectorAll<HTMLFieldSetElement>('[data-mode-options]');
+
+function updateVisibleOptions(mode: string) {
+    for (const group of modeGroups) {
+        const isActive = group.dataset.modeOptions === mode;
+        group.hidden = !isActive;
+
+        // disable fields in inactive groups so FormData doesn't include them
+        for (const field of group.querySelectorAll<HTMLInputElement>('input, select, textarea')) {
+            field.disabled = !isActive;
+        }
+    }
+}
+
+modeInputs.forEach(input => {
+    input.addEventListener('change', () => {
+        if (input.checked) updateVisibleOptions(input.value);
+    });
+});
+
+const initialMode = form.querySelector<HTMLInputElement>('input[name="gamemode"]:checked')?.value;
+if (initialMode) updateVisibleOptions(initialMode);
+
+function getConfig(formData: FormData): GameConfig {
+  const trickplay = formData.get("trickplay") as TrickPlayOption;
+  const gamemode = formData.get("gamemode") as GameMode;
+
+  switch (gamemode) {
+    case 'classic':
+      return {
+        trickplay: trickplay,
+        gamemode: gamemode,
+      };
+    case 'embers':
+      return {
+        trickplay: trickplay,
+        gamemode: gamemode,
+        numHands: parseInt(formData.get('numhands') as string),
+        packs: parseInt(formData.get('packs') as string),
+        sitout: parseInt(formData.get('sitouts') as string),
+      };
+    }
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const formData = new FormData(form);
-  const trickplay = formData.get("trickplay") as TrickPlayOption;
-  const config: GameConfig = {
-    trickplay: trickplay,
-    gamemode: 'classic',  // TODO
-  }
+
+  const config: GameConfig = getConfig(formData);
 
   menu.hidden = true;
-  resetValues();
+  // resetValues();
 
   await loadGame(config);
 });
