@@ -103,9 +103,10 @@ export class Player {
 
     get score(): number {
         const scores = this.scores;
-        return scores.length === 0 ? 0 : scores.reduce(
+        let bankedScore = scores.length === 0 ? 0 : scores.reduce(
             (total, value) => total + value
         );
+        return bankedScore + this.scoreDetails.score;
     }
 
     get previousScore(): number {
