@@ -675,7 +675,10 @@ export class GameState {
 
             scores: Object.fromEntries(
                 this.players.map(
-                    (player) => [player.name, player.score]
+                    (player) => [
+                        player.name,
+                        player.score + player.scoreDetails.score + this.getPlayerPartner(player).scoreDetails.score
+                    ]
                )
             ) as Record<PlayerName, number>,
             prevScores: Object.fromEntries(

@@ -106,7 +106,7 @@ export class Player {
         let bankedScore = scores.length === 0 ? 0 : scores.reduce(
             (total, value) => total + value
         );
-        return bankedScore + this.scoreDetails.score;
+        return bankedScore;
     }
 
     get previousScore(): number {
