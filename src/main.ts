@@ -29,6 +29,7 @@ function resetValues() {
     `input[name="gamemode"][value="${DEFAULTS.gamemode}"]`
   ) as HTMLInputElement).checked = true;
 
+  updateVisibleOptions(DEFAULTS.gamemode);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -40,6 +41,7 @@ button.addEventListener("click", () => {
   menu.hidden = !menu.hidden;
 });
 
+// TODO: repeat this for sitouts vs packs
 const modeInputs = form.querySelectorAll<HTMLInputElement>('input[name="gamemode"]');
 const modeGroups = form.querySelectorAll<HTMLFieldSetElement>('[data-mode-options]');
 
