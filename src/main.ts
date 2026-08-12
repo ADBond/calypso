@@ -29,6 +29,19 @@ function resetValues() {
     `input[name="gamemode"][value="${DEFAULTS.gamemode}"]`
   ) as HTMLInputElement).checked = true;
 
+  // need defaults for embers mode so when we open it, it is preselected
+  // TODO: a nicer way to do these?
+  (form.querySelector(
+    `input[name="numhands"][value="4"]`
+  ) as HTMLInputElement).checked = true;
+  (form.querySelector(
+    `input[name="packs"][value="2"]`
+  ) as HTMLInputElement).checked = true;
+  (form.querySelector(
+    `input[name="sitouts"][value="0"]`
+  ) as HTMLInputElement).checked = true;
+
+
   updateVisibleOptions(DEFAULTS.gamemode);
 }
 
