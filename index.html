@@ -31,7 +31,7 @@
                 <label for="gamemode-embers">Embers</label>
             </fieldset>
 
-            <fieldset data-mode-options="embers" hidden>
+            <fieldset data-gamemode-options="embers" hidden>
                 <legend>Number of hands</legend>
                 <input type="radio" name="numhands" value="4" id="numhands-4">
                 <label for="numhands-4">4</label>
@@ -43,7 +43,7 @@
                 <label for="numhands-16">16</label>
             </fieldset>
 
-            <fieldset data-mode-options="embers" hidden>
+            <fieldset data-gamemode-options="embers" hidden>
                 <legend>Number of packs</legend>
                 <input type="radio" name="packs" value="2" id="packs-2">
                 <label for="packs-2">2</label>
@@ -53,14 +53,20 @@
                 <label for="packs-4">4</label>
             </fieldset>
 
-            <fieldset data-mode-options="embers" hidden>
+            <fieldset data-gamemode-options="embers" hidden>
                 <legend>Sitouts</legend>
-                <input type="radio" name="sitouts" value="0" id="sitouts-0">
-                <label for="sitouts-0">0</label>
-                <input type="radio" name="sitouts" value="1" id="sitouts-1">
-                <label for="sitouts-1">1</label>
-                <input type="radio" name="sitouts" value="2" id="sitouts-2">
-                <label for="sitouts-2">2</label>
+                <div class="option-row" data-packs-options="2,3,4" hidden>
+                    <input type="radio" name="sitouts" value="0" id="sitouts-0">
+                    <label for="sitouts-0">0</label>
+                </div>
+                <div class="option-row" data-packs-options="3,4" hidden>
+                    <input type="radio" name="sitouts" value="1" id="sitouts-1">
+                    <label for="sitouts-1">1</label>
+                </div>
+                <div class="option-row" data-packs-options="4" hidden>
+                    <input type="radio" name="sitouts" value="2" id="sitouts-2">
+                    <label for="sitouts-2">2</label>
+                </div>
             </fieldset>
 
             <button type="submit" id="play-now">Play Now</button>
