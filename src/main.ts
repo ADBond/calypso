@@ -68,7 +68,8 @@ function updateVisibleOptions(choice: string, option: string) {
         group.hidden = !isActive;
 
         // disable fields in inactive groups so FormData doesn't include them
-        for (const field of group.querySelectorAll<HTMLInputElement>('input, select, textarea, label')) {
+        const fields = group.querySelectorAll<HTMLInputElement>('input, select, textarea, label')
+        for (const field of fields) {
             field.disabled = !isActive;
         }
     }
@@ -104,12 +105,14 @@ function getConfig(formData: FormData): GameConfig {
         gamemode: gamemode,
       };
     case 'embers':
+      const sitoutStr = formData.get('sitouts');
+      if (sitoutStr === null) throw new Error(`Invalid sitouts selection`)
       return {
         trickplay: trickplay,
         gamemode: gamemode,
         numHands: parseInt(formData.get('numhands') as string),
         packs: parseInt(formData.get('packs') as string),
-        sitout: parseInt(formData.get('sitouts') as string),
+        sitout: parseInt(sitoutStr as string),
       };
     }
 }
