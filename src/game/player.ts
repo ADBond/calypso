@@ -42,6 +42,33 @@ export class ScoreDetails {
     }
 }
 
+class Calypso {
+
+    constructor(public cards: Card[] = []) { }
+
+    public clone() {
+        return new Calypso(
+            [...this.cards],
+        )
+    }
+
+    get numCards(): number {
+        return this.cards.length;
+    }
+
+    get cardStrings(): string[] {
+        return this.cards.map(card => card.toStringShort())
+    }
+
+    public has(card: Card): boolean {
+        return this.cardStrings.includes(card.toStringShort());
+    }
+
+    public add(card: Card) {
+        this.cards.push(card);
+    }
+}
+
 export class Player {
     constructor(
         public displayName: string,
@@ -51,9 +78,10 @@ export class Player {
         public trumpSuit: Suit,
         public hand: Card[] = [],
         public scores: number[] = [],
-        public calypsoInProgress: Set<string> = new Set(),
+        public calypsoInProgress: Calypso = new Calypso(),
         public completedCalypsoes: number = 0,
         public trickpile: Card[] = [],
+        public oldCalypso: Calypso = new Calypso(),
         // public scores: ScoreBreakdown[] = [],
     ) { }
 
@@ -66,16 +94,19 @@ export class Player {
             this.trumpSuit,
             [...this.hand],
             [...this.scores],
-            new Set(this.calypsoInProgress),
+            this.calypsoInProgress.clone(),
             this.completedCalypsoes,
+            [...this.trickpile],
+            this.oldCalypso.clone(),
         );
     }
 
     get score(): number {
         const scores = this.scores;
-        return scores.length === 0 ? 0 : scores.reduce(
+        let bankedScore = scores.length === 0 ? 0 : scores.reduce(
             (total, value) => total + value
         );
+        return bankedScore;
     }
 
     get previousScore(): number {
@@ -91,7 +122,7 @@ export class Player {
     }
 
     get numCardsInCalypso(): number {
-        return this.calypsoInProgress.size;
+        return this.calypsoInProgress.numCards;
     }
 
     get calypsoIsComplete(): boolean {
@@ -100,23 +131,27 @@ export class Player {
     }
 
     resetCards() {
-        this.calypsoInProgress = new Set();
+        this.calypsoInProgress = new Calypso();
         this.trickpile = [];
         this.completedCalypsoes = 0;
+    }
+
+    public resetOldCalypso() {
+        this.oldCalypso = new Calypso();
     }
 
     private addCalypsoCards(cards: Card[]): Card[] {
         const leftovers: Card[] = [];
         for (const card of cards) {
-            const cardStr = card.toStringShort();
-            if (this.calypsoInProgress.has(cardStr)) {
+            if (this.calypsoInProgress.has(card)) {
                 leftovers.push(card);
             } else {
-                this.calypsoInProgress.add(cardStr);
+                this.calypsoInProgress.add(card);
             }
             if (this.calypsoIsComplete) {
                 this.completedCalypsoes += 1;
-                this.calypsoInProgress = new Set();
+                this.oldCalypso = this.calypsoInProgress.clone();
+                this.calypsoInProgress = new Calypso();
             }
         }
         return leftovers;

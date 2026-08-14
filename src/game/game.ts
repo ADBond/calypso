@@ -4,6 +4,7 @@ import { AgentName } from "./agent/agent";
 
 export const defaultConfig: GameConfig = {
   trickplay: 'standard',
+  gamemode: 'classic',
 }
 
 function randomID(): string {

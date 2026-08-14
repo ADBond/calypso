@@ -21,7 +21,52 @@
                 <label for="trickplay-standard">Standard</label>
                 <input type="radio" name="trickplay" value="allfours" id="trickplay-allfours">
                 <label for="trickplay-allfours">All Fours</label>
+            </fieldset>
 
+            <fieldset>
+                <legend>Game format</legend>
+                <input type="radio" name="gamemode" value="classic" id="gamemode-classic">
+                <label for="gamemode-classic">Classic</label>
+                <input type="radio" name="gamemode" value="embers" id="gamemode-embers">
+                <label for="gamemode-embers">Embers</label>
+            </fieldset>
+
+            <fieldset data-gamemode-options="embers" hidden>
+                <legend>Number of hands</legend>
+                <input type="radio" name="numhands" value="4" id="numhands-4">
+                <label for="numhands-4">4</label>
+                <input type="radio" name="numhands" value="8" id="numhands-8">
+                <label for="numhands-8">8</label>
+                <input type="radio" name="numhands" value="12" id="numhands-12">
+                <label for="numhands-12">12</label>
+                <input type="radio" name="numhands" value="16" id="numhands-16">
+                <label for="numhands-16">16</label>
+            </fieldset>
+
+            <fieldset data-gamemode-options="embers" hidden>
+                <legend>Number of packs</legend>
+                <input type="radio" name="packs" value="2" id="packs-2">
+                <label for="packs-2">2</label>
+                <input type="radio" name="packs" value="3" id="packs-3">
+                <label for="packs-3">3</label>
+                <input type="radio" name="packs" value="4" id="packs-4">
+                <label for="packs-4">4</label>
+            </fieldset>
+
+            <fieldset data-gamemode-options="embers" hidden>
+                <legend>Sitouts</legend>
+                <div class="option-row" data-packs-options="2,3,4" hidden>
+                    <input type="radio" name="sitouts" value="0" id="sitouts-0">
+                    <label for="sitouts-0">0</label>
+                </div>
+                <div class="option-row" data-packs-options="3,4" hidden>
+                    <input type="radio" name="sitouts" value="1" id="sitouts-1">
+                    <label for="sitouts-1">1</label>
+                </div>
+                <div class="option-row" data-packs-options="4" hidden>
+                    <input type="radio" name="sitouts" value="2" id="sitouts-2">
+                    <label for="sitouts-2">2</label>
+                </div>
             </fieldset>
 
             <button type="submit" id="play-now">Play Now</button>

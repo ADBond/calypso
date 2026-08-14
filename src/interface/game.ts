@@ -3,6 +3,7 @@ import { GameConfig } from "../game/gamestate";
 
 let game: Game;
 const opp = 'ismcts1000';
+// const opp = 'random';
 
 export function newGame(config: GameConfig): void {
     const numPlayers = 4;  // TODO: variable, from config?

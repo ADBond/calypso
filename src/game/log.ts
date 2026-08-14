@@ -22,7 +22,7 @@ export class GameLog {
 
     public complete: boolean = false;
     private version: string = getCommitHash();
-    private logVersion: number = 1;
+    private logVersion: number = 2;
     private game: string = 'calypso';
 
     constructor(
@@ -71,6 +71,7 @@ export class GameLog {
 
 // send game log to storage
 export async function sendGameLog(log: GameLog) {
+    return ;
     try {
         const res = await fetch("https://qaw-games.netlify.app/.netlify/functions/saveGameLog", {
             method: "POST",

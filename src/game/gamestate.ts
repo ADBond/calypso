@@ -4,15 +4,59 @@ import { Agent, AgentName, agentLookup } from "./agent/agent";
 import { GameLog } from "./log";
 
 export type TrickPlayOption = 'standard' | 'allfours';
+export type GameMode = 'classic' | 'embers';
 
-export type GameConfig = {
+interface BaseGameConfig {
     trickplay: TrickPlayOption,
+    gamemode: GameMode,
 }
 
+interface ClassicConfig extends BaseGameConfig {
+    gamemode: 'classic',
+    // TODO: rounds
+    // TODO: could we include packs - lifting it up to base in reality?
+}
+
+interface EmbersConfig extends BaseGameConfig {
+    gamemode: 'embers',
+    numHands: number,
+    packs: number,
+    sitout: number,
+}
+// default values 3, 1
+// start off with 'packs' packs in green room
+// we have 'sitout' sin bins. this can be at most 2 fewer than the number of packs
+// each hand we play as usual
+// at end of each we score calypsoes and trickpile cards
+// we move all (n-1)th sinbin to nth sinbin
+// the maximum sinbin number (i.e. #2 for sitout === 2) gets added to greenroom
+// we put all trickpile cards into the 1st sinbin
+// we then deal next hand from greenroom, and repeat
+// carry on until final hand when we also score partials
+
+export type GameConfig = ClassicConfig | EmbersConfig;
+
 function copyConfig(config: GameConfig): GameConfig {
-    return {
+    const base = {
         trickplay: config.trickplay,
     };
+    switch(config.gamemode) {
+        case 'classic':
+            return {
+                gamemode: 'classic',
+                ...base,
+            };
+        case 'embers':
+            return {
+                gamemode: 'embers',
+                ...base,
+                numHands: config.numHands,
+                packs: config.packs,
+                sitout: config.sitout,
+            }
+        default:
+            throw new Error(`Unexpected config gamemode value! ${JSON.stringify(config)}`);
+    }
 }
 
 export type state = (
@@ -28,7 +72,10 @@ export type state = (
 export class GameState {
     public dealerIndex: number;
     public currentPlayerIndex: number;
-    public pack: Card[];
+    public greenroom: Card[] = [];
+    public sinbins: Card[][];
+    public forSinbin: Card[] = [];
+    public forGreenRoom: Card[] = [];
     public fullPack: Card[];
 
     public players: Player[] = [];
@@ -63,8 +110,11 @@ export class GameState {
         // dummy values:
         this.currentPlayerIndex = 0;
         this.trickIndex = 0;
-        this.pack = getFullPack();
-        this.fullPack = getFullPack();  // only need if we have variable sizes
+
+        const numPacks = (this.config.gamemode === "embers") ? this.config.packs : 4;
+        this.fullPack = getFullPack(numPacks);  // only need if we have variable sizes
+        this.resetPack();
+        this.sinbins = [];
     }
 
     public clone(): GameState {
@@ -76,14 +126,16 @@ export class GameState {
         // copy remaining state
         newState.dealerIndex = this.dealerIndex;
         newState.currentPlayerIndex = this.currentPlayerIndex;
-        newState.pack = [...this.pack];
+        newState.greenroom = [...this.greenroom];
+        newState.forGreenRoom = [...this.forGreenRoom];
+        newState.forSinbin = [...this.forSinbin];
+        newState.sinbins = this.sinbins.map(sinbin => [...sinbin]);
         newState.fullPack = [...this.fullPack];
 
         newState.players = this.players.map(player => player.clone());
         newState.trickIndex = this.trickIndex;
-        // TODO: does it matter that these players are different to the ones in player array?
         newState.trickInProgress = this.trickInProgress.map(
-            ([card, player]) => [card, player.clone()]
+            ([card, player]) => [card, newState.players[player.positionIndex]]
         );
         newState.playedCards = [...this.playedCards];
     
@@ -91,7 +143,7 @@ export class GameState {
         newState.currentState = this.currentState;
 
         newState.previousTrick = this.previousTrick.map(
-            ([card, player]) => [card, player.clone()]
+            ([card, player]) => [card, newState.players[player.positionIndex]]
         );
 
         return newState;
@@ -102,12 +154,18 @@ export class GameState {
         // console.log(`Incrementing state - currently: ${state}`);
         switch (state) {
             case 'new_round':
+                this.resetPack();
                 this.shuffle();
                 for (const player of this.players) {
                     player.resetCards();
                 }
+                this.currentState = 'new_hand';
                 break;
             case 'new_hand':
+                if (this.config.gamemode === 'embers') {
+                    // shuffle at the start of each hand in embers format
+                    this.shuffle();
+                }
                 this.dealCards(log);
                 break;
             case 'play_card':
@@ -117,6 +175,7 @@ export class GameState {
                 this.resetTrick(log);
                 break;
             case 'hand_complete':
+                this.processCards();
                 this.dealerIndex = this.getNextPlayerIndex(this.dealerIndex);
 
                 if (log !== null) {
@@ -205,12 +264,16 @@ export class GameState {
         return this.players[partnersIndex];
     }
 
+    getPlayerScore(player: Player): number {
+        return player.score + player.scoreDetails.score + this.getPlayerPartner(player).scoreDetails.score;
+    }
+
     get prevTrickScores(): number[] {
         return this.players.map(player => player.previousScore);
     }
 
     get scores(): number[] {
-        return this.players.map(player => player.score);
+        return this.players.map(player => this.getPlayerScore(player));
     }
 
     private getPlayedCard(name: PlayerName, trick: [Card | null, Player][]): Card | null {
@@ -375,11 +438,42 @@ export class GameState {
 
     get roundIsFinished(): boolean {
         // TODO: generalise!
-        return this.handNumber === 4;
+        if (this.config.gamemode === 'classic') {
+            return this.handNumber === 4;
+        }
+        // embers
+        return this.handNumber === this.config.numHands;
+    }
+
+    validateCardsEmbers(stage: string) {
+        // validate that cards are all accounted for
+        const cardsInHands = this.players.map(p => p.hand).flat();
+        const cardsInCalypsoes = this.players.map(p => p.calypsoInProgress.cards).flat();
+        const forGreenRoom = this.forGreenRoom;
+        const greenRoom = this.greenroom;
+        const forSinbin = this.forSinbin;
+        const sinbins = this.sinbins.flat();
+        const allCardsPartitioned = {
+            hands: cardsInHands,
+            calypsoes: cardsInCalypsoes,
+            for_greenroom: forGreenRoom,
+            greenroom: greenRoom,
+            for_sinbin: forSinbin,
+            sinbins: sinbins,
+        };
+        if (
+            Object.values(allCardsPartitioned).map(arr => arr.length).reduce((a, b) => a + b, 0) !== this.fullPack.length
+        ) {
+            console.log(Object.entries(allCardsPartitioned).map(([area, cards]) => [area, cards.length]));
+            console.log(this.players.map(p => p.trickpile.length));
+            console.log(`Trickpile total: ${this.players.map(p => p.trickpile.length).reduce((a, b) => a + b, 0)}`);
+            console.log(this.players.map(p => p.completedCalypsoes));
+            throw new Error("Invariant violated!");
+        }
     }
 
     public moveFromIndex(cardToPlayIndex: number): number {
-        const cardToPlay = Card.cardFromIndex(cardToPlayIndex, this.fullPack)
+        const cardToPlay = Card.cardFromIndex(cardToPlayIndex, this.fullPack);
 
         if (!this.playCard(cardToPlay)) {
             console.log("Error playing card");
@@ -401,6 +495,10 @@ export class GameState {
         }
 
         const currentLegalMoves = this.legalMoveIndices;
+        if (currentLegalMoves.length === 0) {
+            console.log(this);
+            throw new Error();
+        }
         const cardToPlayIndex = await agent.chooseMove(this, currentLegalMoves);
         return this.moveFromIndex(cardToPlayIndex);
     }
@@ -446,17 +544,27 @@ export class GameState {
         return true;
     }
 
+    resetPack(): void {
+        this.greenroom = [...this.fullPack];
+    }
+
     shuffle(): void {
-        const pack = getFullPack();
+        const pack = this.greenroom;
         shuffle(pack);
-        this.pack = pack;
-        this.playedCards = [];
-        this.currentState = 'new_hand';
+        this.greenroom = pack;
+        this.playedCards = this.players.map(p => p.calypsoInProgress.cards).flat();
     }
 
     // TODO: seed?
     dealCards(log: GameLog | null): void {
-        const pack = this.pack;
+        const pack = this.greenroom;
+        // console.log(pack.length);
+        if (this.config.gamemode === 'embers') {
+            this.validateCardsEmbers('pre-deal');
+        }
+        if (pack.length < (this.numPlayers * this.cardsPerHand)) {
+            throw new Error(`Not enough cards! ${pack.length}`);
+        }
         for (let i = 0; i < this.cardsPerHand; i++) {
             for (let playerIndex = 0; playerIndex < this.numPlayers; playerIndex++) {
                 const card = pack.pop();
@@ -493,6 +601,17 @@ export class GameState {
         leftovers.push(...winnerPlayer.processCalypsoCards(winnerCards));
         leftovers.push(...winnersPartner.processCalypsoCards(partnerCards));
         winnerPlayer.trickpile.push(...leftovers);
+        if (this.config.gamemode === 'embers') {
+            this.forSinbin.push(...leftovers);
+            if (winnerPlayer.oldCalypso.numCards !== 0) {
+                this.forGreenRoom.push(...winnerPlayer.oldCalypso.cards);
+                winnerPlayer.resetOldCalypso();
+            }
+            if (winnersPartner.oldCalypso.numCards !== 0) {
+                this.forGreenRoom.push(...winnersPartner.oldCalypso.cards);
+                winnersPartner.resetOldCalypso();
+            }
+        }
 
         if (log !== null) {
             log.captureTrick(
@@ -515,6 +634,22 @@ export class GameState {
         }
     }
 
+    processCards() {
+        if (this.config.gamemode === 'classic') {
+            return;
+        }
+        const numSinbins = this.config.sitout;
+        const forSinbin: Card[] = [...this.forSinbin];
+        this.sinbins.unshift(forSinbin);
+        this.forSinbin = [];
+        if (this.sinbins.length === numSinbins + 1) {
+            const forGreenroom = this.sinbins.pop()!;
+            forGreenroom.push(...this.forGreenRoom);
+            this.greenroom.push(...forGreenroom);
+            this.forGreenRoom = [];
+        }
+    }
+
     updateScores() {
         const scores = [0, 0];
         for (let i = 0; i < this.numPlayers; i++) {
@@ -533,12 +668,13 @@ export class GameState {
     }
 
     // this probably shouldn't live here, but still...
-    static calypsoForDisplay(suit: Suit, cards: Set<string>): string[] {
+    static calypsoForDisplay(suit: Suit, cards: Card[]): string[] {
         const suitStr = suit.toStringShort();
+        const cardStrs = cards.map(card => card.toStringShort());
         const out: string[] = [];
         for (const rank of RANKS) {
             const card = `${rank.toStringShort()}${suitStr}`;
-            if (cards.has(card)) {
+            if (cardStrs.includes(card)) {
                 out.push(card);
             } else{
                 out.push("none");
@@ -550,7 +686,7 @@ export class GameState {
     getStateForUI(): GameStateForUI {
         return ({
             playerNameArr: this.players.map(player => player.name),
-            trickplay: this.config.trickplay,
+            config: this.config,
             hands: {
                 player: this.currentState === "hand_complete" ? [] : this.humanHand.slice(),
                 comp1: [],
@@ -567,7 +703,7 @@ export class GameState {
             ) as Record<PlayerName, Suit>,
             calypsoes: Object.fromEntries(
                 this.players.map(
-                    (player) => [player.name, GameState.calypsoForDisplay(player.trumpSuit, player.calypsoInProgress)]
+                    (player) => [player.name, GameState.calypsoForDisplay(player.trumpSuit, player.calypsoInProgress.cards)]
                )
             ) as Record<PlayerName, string[]>,
             trickpiles: Object.fromEntries(
@@ -583,7 +719,10 @@ export class GameState {
 
             scores: Object.fromEntries(
                 this.players.map(
-                    (player) => [player.name, player.score]
+                    (player) => [
+                        player.name,
+                        this.getPlayerScore(player),
+                    ]
                )
             ) as Record<PlayerName, number>,
             prevScores: Object.fromEntries(
@@ -624,7 +763,7 @@ export interface GameStateForUI {
 
     handNumber: number;
     trickNumber: number;
-    trickplay: TrickPlayOption,
+    config: GameConfig,
 
     gameState: state;
     whoseTurn: PlayerName;
