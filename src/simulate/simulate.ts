@@ -7,7 +7,15 @@ import { GameLog } from '../game/log';
 export async function simulate(agents: AgentName[]): Promise<Game> {
     const config: GameConfig = {
         trickplay: 'standard',
+        gamemode: 'classic',
     };
+    // {
+    //     trickplay: 'allfours',
+    //     gamemode: 'embers',
+    //     packs: 2,
+    //     sitout: 0,
+    //     numHands: 4,
+    // };
     let game = new Game(agents, config, true);
     let current = game.getGameStateForUI();
 
@@ -32,7 +40,11 @@ export async function simulate(agents: AgentName[]): Promise<Game> {
 
 export async function simulateRound(player: AgentName): Promise<[number[], GameLog]> {
     const config: GameConfig = {
-        trickplay: 'standard',
+        trickplay: 'allfours',
+        gamemode: 'embers',
+        packs: 2,
+        sitout: 0,
+        numHands: 4,
     };
     let game = new Game([player, player, player, player], config, true);
     let current = game.getGameStateForUI();

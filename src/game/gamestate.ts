@@ -127,13 +127,15 @@ export class GameState {
         newState.dealerIndex = this.dealerIndex;
         newState.currentPlayerIndex = this.currentPlayerIndex;
         newState.greenroom = [...this.greenroom];
+        newState.forGreenRoom = [...this.forGreenRoom];
+        newState.forSinbin = [...this.forSinbin];
+        newState.sinbins = this.sinbins.map(sinbin => [...sinbin]);
         newState.fullPack = [...this.fullPack];
 
         newState.players = this.players.map(player => player.clone());
         newState.trickIndex = this.trickIndex;
-        // TODO: does it matter that these players are different to the ones in player array?
         newState.trickInProgress = this.trickInProgress.map(
-            ([card, player]) => [card, player.clone()]
+            ([card, player]) => [card, newState.players[player.positionIndex]]
         );
         newState.playedCards = [...this.playedCards];
     
@@ -141,7 +143,7 @@ export class GameState {
         newState.currentState = this.currentState;
 
         newState.previousTrick = this.previousTrick.map(
-            ([card, player]) => [card, player.clone()]
+            ([card, player]) => [card, newState.players[player.positionIndex]]
         );
 
         return newState;
@@ -262,12 +264,16 @@ export class GameState {
         return this.players[partnersIndex];
     }
 
+    getPlayerScore(player: Player): number {
+        return player.score + player.scoreDetails.score + this.getPlayerPartner(player).scoreDetails.score;
+    }
+
     get prevTrickScores(): number[] {
         return this.players.map(player => player.previousScore);
     }
 
     get scores(): number[] {
-        return this.players.map(player => player.score);
+        return this.players.map(player => this.getPlayerScore(player));
     }
 
     private getPlayedCard(name: PlayerName, trick: [Card | null, Player][]): Card | null {
@@ -439,8 +445,35 @@ export class GameState {
         return this.handNumber === this.config.numHands;
     }
 
+    validateCardsEmbers(stage: string) {
+        // validate that cards are all accounted for
+        const cardsInHands = this.players.map(p => p.hand).flat();
+        const cardsInCalypsoes = this.players.map(p => p.calypsoInProgress.cards).flat();
+        const forGreenRoom = this.forGreenRoom;
+        const greenRoom = this.greenroom;
+        const forSinbin = this.forSinbin;
+        const sinbins = this.sinbins.flat();
+        const allCardsPartitioned = {
+            hands: cardsInHands,
+            calypsoes: cardsInCalypsoes,
+            for_greenroom: forGreenRoom,
+            greenroom: greenRoom,
+            for_sinbin: forSinbin,
+            sinbins: sinbins,
+        };
+        if (
+            Object.values(allCardsPartitioned).map(arr => arr.length).reduce((a, b) => a + b, 0) !== this.fullPack.length
+        ) {
+            console.log(Object.entries(allCardsPartitioned).map(([area, cards]) => [area, cards.length]));
+            console.log(this.players.map(p => p.trickpile.length));
+            console.log(`Trickpile total: ${this.players.map(p => p.trickpile.length).reduce((a, b) => a + b, 0)}`);
+            console.log(this.players.map(p => p.completedCalypsoes));
+            throw new Error("Invariant violated!");
+        }
+    }
+
     public moveFromIndex(cardToPlayIndex: number): number {
-        const cardToPlay = Card.cardFromIndex(cardToPlayIndex, this.fullPack)
+        const cardToPlay = Card.cardFromIndex(cardToPlayIndex, this.fullPack);
 
         if (!this.playCard(cardToPlay)) {
             console.log("Error playing card");
@@ -462,6 +495,10 @@ export class GameState {
         }
 
         const currentLegalMoves = this.legalMoveIndices;
+        if (currentLegalMoves.length === 0) {
+            console.log(this);
+            throw new Error();
+        }
         const cardToPlayIndex = await agent.chooseMove(this, currentLegalMoves);
         return this.moveFromIndex(cardToPlayIndex);
     }
@@ -515,12 +552,19 @@ export class GameState {
         const pack = this.greenroom;
         shuffle(pack);
         this.greenroom = pack;
-        this.playedCards = [];
+        this.playedCards = this.players.map(p => p.calypsoInProgress.cards).flat();
     }
 
     // TODO: seed?
     dealCards(log: GameLog | null): void {
         const pack = this.greenroom;
+        // console.log(pack.length);
+        if (this.config.gamemode === 'embers') {
+            this.validateCardsEmbers('pre-deal');
+        }
+        if (pack.length < (this.numPlayers * this.cardsPerHand)) {
+            throw new Error(`Not enough cards! ${pack.length}`);
+        }
         for (let i = 0; i < this.cardsPerHand; i++) {
             for (let playerIndex = 0; playerIndex < this.numPlayers; playerIndex++) {
                 const card = pack.pop();
@@ -595,7 +639,7 @@ export class GameState {
             return;
         }
         const numSinbins = this.config.sitout;
-        const forSinbin: Card[] = this.forSinbin;
+        const forSinbin: Card[] = [...this.forSinbin];
         this.sinbins.unshift(forSinbin);
         this.forSinbin = [];
         if (this.sinbins.length === numSinbins + 1) {
@@ -677,7 +721,7 @@ export class GameState {
                 this.players.map(
                     (player) => [
                         player.name,
-                        player.score + player.scoreDetails.score + this.getPlayerPartner(player).scoreDetails.score
+                        this.getPlayerScore(player),
                     ]
                )
             ) as Record<PlayerName, number>,

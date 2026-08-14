@@ -106,6 +106,7 @@ export async function ismcts(
     // console.log(`ISMCTS called ${Math.random()}`);
     const initialPlayerIndex = rootState.currentPlayerIndex;
     const initialScores = zeroSum(rootState.scores);
+    const initialHand = rootState.handNumber;
     const rootNode = new ISMCTSNode(initialPlayerIndex);
     const numPlayers = rootState.numPlayers;
 
@@ -162,7 +163,11 @@ export async function ismcts(
         }
 
         // rollout: play until the end of round when we get score info
-        while (!["round_complete"].includes(state.currentState)) {
+        // or a couple of hands later
+        while (!(
+            ["round_complete"].includes(state.currentState) ||
+            state.handNumber === initialHand + 2
+        )) {
             await state.increment();
         }
 
@@ -197,9 +202,13 @@ export async function ismcts(
     const highestVisits = Math.max(
         ...Object.values(rootNode.children).map(node => node.visits)
     );
+    // console.log('root');
+    // console.log(rootNode);
     const bestChild = Object.values(rootNode.children).filter(
         node => node.visits === highestVisits
     )[0];
+    // console.log('best');
+    // console.log(bestChild.move);
     return [bestChild.move, rootNode];
 }
 
