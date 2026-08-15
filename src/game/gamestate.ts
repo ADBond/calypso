@@ -651,15 +651,16 @@ export class GameState {
     }
 
     updateScores() {
-        const scores = [0, 0];
-        for (let i = 0; i < this.numPlayers; i++) {
-            const player = this.players[i];
-            scores[i % 2] += player.thisHandScore;
-        }
-        for (let i = 0; i < this.numPlayers; i++) {
-            const player = this.players[i];
-            player.scores.push(scores[i % 2]);
-        }
+        // const scores = [0, 0];
+        // for (let i = 0; i < this.numPlayers; i++) {
+        //     const player = this.players[i];
+        //     scores[i % 2] += player.thisHandScore;
+        // }
+        // for (let i = 0; i < this.numPlayers; i++) {
+        //     const player = this.players[i];
+        //     player.scores.push(scores[i % 2]);
+        // }
+        // TODO: push completed rounds, if appropriate
     }
 
     completeLog(log: GameLog) {
