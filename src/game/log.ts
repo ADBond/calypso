@@ -71,7 +71,6 @@ export class GameLog {
 
 // send game log to storage
 export async function sendGameLog(log: GameLog) {
-    return ;
     try {
         const res = await fetch("https://qaw-games.netlify.app/.netlify/functions/saveGameLog", {
             method: "POST",
